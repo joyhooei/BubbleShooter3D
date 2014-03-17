@@ -4,16 +4,97 @@ using System.Collections;
 
 public class CameraController : MonoBehaviour {
 	int cubeRotSpeed = 80;
+	bool freeView = true;
+	private Vector2 lastPos;
+	private bool holdingMouse = false;
+	private Vector2 diff;
+
+	private GameObject[] worldObjects;
 	// Use this for initialization
 	void Start () {
 		//Screen.lockCursor = true;
+		diff = Vector2.zero;
 	}
-	
+
+	void FixedUpdate(){
+
+
+	}
+
+	private void moveCluster(Vector2 movement){
+		float speedFactor = 10.0f;
+		worldObjects = GameObject.FindGameObjectsWithTag("BigBall");
+		foreach(GameObject gObject in worldObjects)
+		{
+			gObject.transform.RotateAround(Vector3.zero,  Vector3.up, -1*movement[0] *speedFactor* Time.deltaTime);
+			gObject.transform.RotateAround(Vector3.zero,  Vector3.right, movement[1] *speedFactor* Time.deltaTime);
+		}
+		diff = Vector2.zero;
+	}
 	// Update is called once per frame
 	void Update () {
+		if(freeView){
+			if (Input.GetButtonDown("Fire1") ) {		
+				holdingMouse = true;	
+				lastPos = Input.mousePosition;	
+			}
+
+			if (Input.GetButtonUp("Fire1")) {		
+				holdingMouse = false;	
+				lastPos = Vector2.zero;
+			}
+
+			if(holdingMouse){
+				diff = new Vector2(Input.mousePosition[0]-lastPos[0],Input.mousePosition[1]-lastPos[1]);
+
+				lastPos = Input.mousePosition;
+
+			}
+		}
+		/*
+		foreach (Touch touch in Input.touches) {                
+			
+			Debug.Log ("reading input");
+			// Handle finger movements based on touch phase.
+			switch (touch.phase) {
+				// Record initial touch position.
+			case TouchPhase.Began:
+				lastPos = touch.position;
+				break;
+				
+				// Determine direction by comparing the current touch
+				// position with the initial one.
+			case TouchPhase.Moved:
+				diff = touch.position - lastPos;
+				lastPos = touch.position;
+				break;
+				
+				// Report that a direction has been chosen when the finger is lifted.
+			case TouchPhase.Ended:
+				lastPos = Vector2.zero;
+				break;
+			}
+		}
+		*/
+
+		if(diff != Vector2.zero)	moveCluster(diff) ;
+
+		if(Input.GetKey(KeyCode.Keypad9)){
+			freeView = true;
+			worldObjects = GameObject.FindGameObjectsWithTag("BigBall");
+			Debug.Log ("Activating freeview");
+		}
+
+		if(Input.GetKey(KeyCode.Keypad7)){
+			freeView = false;
+			Debug.Log ("DeActivating freeview");
+		}
+
+
+
 		if(Input.GetKey(KeyCode.Keypad4) || Input.GetKey(KeyCode.Keypad5) ||
 			Input.GetKey(KeyCode.Keypad6) || Input.GetKey(KeyCode.Keypad8)){
-			GameObject[] worldObjects = GameObject.FindGameObjectsWithTag("BigBall");
+			worldObjects = GameObject.FindGameObjectsWithTag("BigBall");
 
 			//Up
 			if(Input.GetKey(KeyCode.Keypad8)){
@@ -22,6 +103,8 @@ public class CameraController : MonoBehaviour {
 					gObject.transform.RotateAround(Vector3.zero,  -Vector3.right, cubeRotSpeed * Time.deltaTime);
 				}
 			}
+
+
 			
 			//Down
 			if(Input.GetKey(KeyCode.Keypad5)){

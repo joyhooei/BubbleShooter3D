@@ -58,7 +58,7 @@ public class GameMaster : MonoBehaviour
 		upgrades.Add("BombFrequencyCost", 100);
 		upgrades.Add("BombFrequencyMaxLevel", 7);
 		upgrades.Add("BombSize", 0);
-		upgrades.Add("BombSizeBase", 3);
+		upgrades.Add("BombSizeBase", 10);
 		upgrades.Add("BombSizeCost", 100);
 		upgrades.Add("BombSizeMaxLevel", 5);
 	}

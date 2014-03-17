@@ -14,9 +14,12 @@ public class Shooter : MonoBehaviour {
 	private Transform smallBall = null;
 	private List<Color> colorsAvailable;
 	private Vector3 positionSelected = new Vector3(-1,-1,-1);
+	private bool freeView = true;
+	private CameraController cameraController;
 	
 	// Use this for initialization
 	void Start () {
+
 
 	}
 
@@ -36,7 +39,17 @@ public class Shooter : MonoBehaviour {
 		weaponReady = true;
 	}
 	
-    void Update() {		
+    void Update() {	
+		if(Input.GetKey(KeyCode.Keypad9)){
+			freeView = true;
+			Debug.Log ("Activating freeview");
+		}
+		
+		if(Input.GetKey(KeyCode.Keypad7)){
+			freeView = false;
+			Debug.Log ("DeActivating freeview");
+		}
+
 		time += Time.deltaTime;
 		if(!GameMaster.hasWon && !GameMaster.levelComplete && !GameMaster.hasLost &&  Time.timeScale == 1.0f){
 			if(time>=1.8f && loadedBall == null && GameMaster.levelReady){
@@ -56,44 +69,48 @@ public class Shooter : MonoBehaviour {
 			if (Input.GetButtonDown("Fire1") && positionSelected==new Vector3(-1,-1,-1)) {		
 				positionSelected = Input.mousePosition;	
 			}
-			if(positionSelected != new Vector3(-1,-1,-1) && weaponReady){
-				Ray ray = Camera.main.ScreenPointToRay (positionSelected);
-				RaycastHit hit;
-		        if (Physics.Raycast(Camera.main.transform.position, ray.direction, out hit) && (hit.transform == loadedBall ||hit.transform == magazinedBall)){
-		        	swapBall();
-				}else if(positionSelected[0] <130 && positionSelected[1] <130){
-					//Stop from shooting when clicking bomb powerup icon. Values are by trial and error
-				}else{
-					//Shoots
-					if(loadedBall.name=="Bomb"){
-						Debug.Log ("Shot a bomb");
-						float radius = (float)GameMaster.upgrades["BombSize"]/10;
-						(loadedBall.gameObject.collider as SphereCollider).radius = radius;
+			if(freeView){
+			}else{
+				
+				if(positionSelected != new Vector3(-1,-1,-1) &&  weaponReady){
+					Ray ray = Camera.main.ScreenPointToRay (positionSelected);
+					RaycastHit hit;
+					if (Physics.Raycast(Camera.main.transform.position, ray.direction, out hit) && (hit.transform == loadedBall ||hit.transform == magazinedBall)){
+						swapBall();
+					}else if(positionSelected[0] <130 && positionSelected[1] <130){
+						//Stop from shooting when clicking bomb powerup icon. Values are by trial and error
+					}else{
+						//Shoots
+						if(loadedBall.name=="Bomb"){
+							Debug.Log ("Shot a bomb");
+							float radius = (float)GameMaster.upgrades["BombSize"]/10;
+							(loadedBall.gameObject.collider as SphereCollider).radius = radius;
+							
+							Transform bombModel = loadedBall.FindChild("Bomb(Clone)");
+							float size = (float)GameMaster.upgrades["BombSize"]/5;
+							bombModel.transform.localScale = new Vector3(size,size,size);
+						}
 						
-						Transform bombModel = loadedBall.FindChild("Bomb(Clone)");
-						float size = (float)GameMaster.upgrades["BombSize"]/5;
-						bombModel.transform.localScale = new Vector3(size,size,size);
+						controllerScript = loadedBall.GetComponent<ProjectileController>();
+						loadedBall.transform.localPosition = new Vector3(0,0,0);
+						loadedBall.transform.rotation = transform.rotation;
+						loadedBall.transform.parent = null;
+						controllerScript.StartMove(ray.direction);
+						loadedBall.tag = "BigBall";
+						
+						weaponReady = false;
+						time = 0;	
+						
+						Debug.Log ("fIREOBJECT NAME "+loadedBall.name);
+						EventManager.ObjectFired(loadedBall.name);
+						//Set loadedBall variable to null so a new ball can be loaded
+						loadedBall = null;
+						
+						
+						
 					}
-
-					controllerScript = loadedBall.GetComponent<ProjectileController>();
-					loadedBall.transform.localPosition = new Vector3(0,0,0);
-					loadedBall.transform.rotation = transform.rotation;
-					loadedBall.transform.parent = null;
-					controllerScript.StartMove(ray.direction);
-					loadedBall.tag = "BigBall";
-					
-					weaponReady = false;
-					time = 0;	
-
-					Debug.Log ("fIREOBJECT NAME "+loadedBall.name);
-					EventManager.ObjectFired(loadedBall.name);
-					//Set loadedBall variable to null so a new ball can be loaded
-					loadedBall = null;
-
-
-					
-				}
-			}			
+				}	
+			}
 		}
 		
 		
@@ -109,12 +126,7 @@ public class Shooter : MonoBehaviour {
 			magazinedBall.renderer.material.color = Color.red;
 
 		}
-		if(Input.GetKey(KeyCode.Keypad2)){
-			/*loadedBall.renderer.material.color = Color.black;
-			loadedBall.name = "Bomb";*/
-			PlayerPrefs.SetInt("BombFrequency",10);
 
-		}
 		
 	}
 	void makeBall(){

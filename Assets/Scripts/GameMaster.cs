@@ -208,7 +208,6 @@ public class GameMaster : MonoBehaviour
 			Destroy(go);
 		}
 
-		//A comment
 		
 		//if(GameMaster.world == "space" && GameMaster.levelNr==GameMaster.nLevelsInWorld+1)	GameMaster.hasWon = true;	
 		//else{

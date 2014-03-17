@@ -1,0 +1,11 @@
+fileFormatVersion: 2
+guid: 39bcfd26ea0272a48965055dec4614e0
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - projectile: {fileID: 400000, guid: ec1f39dc00479df4ca3c025c27abd9de, type: 2}
+  - perimeter: {fileID: 400000, guid: f1df3987558b9344d85abf4a00634d2a, type: 2}
+  - defTex: {fileID: 2800000, guid: 5ee55a43fb127844d9bb640dc3697dee, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 

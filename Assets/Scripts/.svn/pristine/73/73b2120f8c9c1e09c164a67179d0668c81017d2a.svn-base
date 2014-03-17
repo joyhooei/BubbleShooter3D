@@ -1,0 +1,156 @@
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+
+public class ProjectileController : MonoBehaviour {
+	int power = 12;
+	public bool moving = false;
+	public List<GameObject> neighbours = new List<GameObject>();
+	//public List<GameObject> comboList = new List<GameObject>();
+	public int comboLimit;
+	public bool beenChecked = false;
+	public bool rooted;
+	
+	void Start () {
+		comboLimit = 3;
+		rooted = true;
+	}
+	//Testing SVN 123123213
+	void Update () {		
+		
+		if(moving){
+			transform.Translate(Vector3.forward*power * Time.deltaTime);
+		}
+		/*if(!rooted){
+			killObject(gameObject);
+		}*/
+		beenChecked = false;
+		if(Input.GetKey(KeyCode.Keypad1))
+			printDebug();
+	}
+	public void StartMove(){
+		moving = true;
+	}
+	
+	void OnTriggerEnter (Collider other) {		
+		if(other.tag == "BigBall"){
+			neighbours.Add(other.gameObject);
+		}
+		
+		if(other.tag == "SmallBall" && !other.transform.IsChildOf(transform)){
+			GameObject smallBall = other.gameObject;
+			GameObject projectile = smallBall.transform.parent.gameObject;
+			ProjectileController projectileScript = projectile.GetComponent<ProjectileController>();
+			
+			Destroy(smallBall);
+			projectileScript.moving = false;
+			projectileScript.beenChecked = true;
+			projectileScript.rooted = true;
+			List<GameObject> comboList = projectileScript.CountSameColors();
+			if(comboList.Count >= comboLimit){
+								Debug.Log("removing combo");
+
+				foreach(GameObject gobject in comboList)
+				{
+					killObject(gobject);
+				}
+				
+				
+				GameObject[] worldObjects = GameObject.FindGameObjectsWithTag("BigBall");
+				foreach(GameObject gObject in worldObjects)
+				{
+					ProjectileController objectScript = gObject.GetComponent<ProjectileController>();
+					objectScript.rooted= false;
+				}
+				GameObject blackBall = GameObject.Find("BlackBall");
+				ProjectileController blackballscript = blackBall.GetComponent<ProjectileController>();		
+				blackballscript.rooted = true;
+				blackballscript.beenChecked = true;
+				checkRoots(blackBall);
+				Debug.Log("removing unrooted");
+				removeUnrooted();
+				
+			}
+			 //var s : GUITexture = FindObjectOfType(GUITexture);
+		}		
+	}
+	void checkRoots(GameObject node){
+		ProjectileController nodeScript = node.GetComponent<ProjectileController>();
+		
+		foreach(GameObject gobject in nodeScript.neighbours)
+        {
+			ProjectileController objectScript = gobject.GetComponent<ProjectileController>();
+			if(!objectScript.beenChecked){
+				objectScript.beenChecked = true;
+				objectScript.rooted = true;
+				checkRoots(gobject);
+			}
+		}
+	}
+	
+	void removeUnrooted(){
+		GameObject[] worldObjects = GameObject.FindGameObjectsWithTag("BigBall");
+		foreach(GameObject gobject in worldObjects)
+        {
+			ProjectileController objectScript = gobject.GetComponent<ProjectileController>();
+			if(objectScript.rooted == false){
+				killObject(gobject);
+			}
+		}
+	}
+	
+	void OnTriggerExit (Collider other) {
+		if(other.tag == "BigBall"){
+			neighbours.Remove(other.gameObject);                                 // add an item to the end of the List
+		}
+		
+	}
+	void killObject(GameObject victim){
+		ProjectileController victimScript = victim.GetComponent<ProjectileController>();
+		foreach(GameObject gobject in victimScript.neighbours)
+        {
+			ProjectileController objectScript = gobject.GetComponent<ProjectileController>();
+			objectScript.neighbours.Remove(victim); 
+		}
+		if(victim.name =="BlackBall")
+			Debug.Log("killing blackball");
+		Destroy(victim);
+	}
+	
+	public List<GameObject> CountSameColors(){
+		List<GameObject> tempList = new List<GameObject>();
+		tempList.Add(gameObject);
+		
+		foreach(GameObject gobject in neighbours)
+        {
+            ProjectileController objectScript = gobject.GetComponent<ProjectileController>();
+			if(!objectScript.beenChecked && gobject.renderer.material.color == gameObject.renderer.material.color){
+				objectScript.beenChecked = true;
+				tempList.AddRange(objectScript.CountSameColors());
+			}
+		}
+		return tempList;
+	}
+	
+	void printDebug(){
+		/*GameObject[] worldObjects = GameObject.FindGameObjectsWithTag("BigBall");
+		Debug.Log("The length of the world"+worldObjects.Length);
+		
+		foreach(GameObject gobject in worldObjects)
+        {
+            ProjectileController objectScript = gobject.GetComponent<ProjectileController>();
+			Debug.Log("naboer"+objectScript.neighbours.Count);
+		}*/
+		GameObject worldObjects = GameObject.Find("BlackBall");
+		
+            ProjectileController objectScript = worldObjects.GetComponent<ProjectileController>();
+			Debug.Log("blackball naboer"+objectScript.neighbours.Count);
+			Debug.Log("blackball naboer"+worldObjects.tag);
+		
+		
+	}
+	
+	
+}
+
+

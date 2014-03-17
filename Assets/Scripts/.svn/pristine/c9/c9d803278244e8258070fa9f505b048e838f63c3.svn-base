@@ -1,0 +1,87 @@
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+
+public class ProjectileController : MonoBehaviour {
+	int power = 4;
+	public bool moving = false;
+	public List<GameObject> neighbours = new List<GameObject>();
+	//public List<GameObject> comboList = new List<GameObject>();
+	public int comboLimit;
+	public bool toBeDestroyed = false;
+	public bool beenChecked = false;
+	
+	void Start () {
+		comboLimit = 3;
+	}
+	//Testing SVN 123123213
+	void Update () {
+		if(toBeDestroyed){
+			Debug.Log("Destroy me! "+ renderer.material.color);
+			killObject(gameObject);
+			return;
+		}
+		beenChecked = false;
+		if(moving){
+			transform.Translate(Vector3.forward*power * Time.deltaTime);
+		}
+	}
+	public void StartMove(){
+		moving = true;
+	}
+	
+	void OnTriggerEnter (Collider other) {		
+		if(other.tag == "BigBall"){
+			neighbours.Add(other.gameObject);
+		}
+		
+		if(other.tag == "SmallBall" && !other.transform.IsChildOf(transform)){
+			GameObject smallBall = other.gameObject;
+			GameObject projectile = smallBall.transform.parent.gameObject;
+			ProjectileController projectileScript = projectile.GetComponent<ProjectileController>();
+			
+			Destroy(smallBall);
+			projectileScript.moving = false;
+			projectileScript.beenChecked = true;
+			List<GameObject> comboList = projectileScript.CountSameColors();
+			if(comboList.Count >= comboLimit){
+				Debug.Log("Combolimit is "+ comboLimit);
+				foreach(GameObject gobject in comboList)
+				{
+					killObject(gobject);
+				}
+			}
+			Debug.Log("Length is "+ comboList.Count);
+		}		
+	}
+	
+	void OnTriggerExit (Collider other) {
+		if(other.tag == "BigBall"){
+			neighbours.Remove(other.gameObject);                                 // add an item to the end of the List
+		}
+	}
+	void killObject(GameObject victim){
+		foreach(GameObject gobject in neighbours)
+        {
+			ProjectileController objectScript = gobject.GetComponent<ProjectileController>();
+			objectScript.neighbours.Remove(victim); 
+		}
+		Destroy(victim);
+	}
+	
+	public List<GameObject> CountSameColors(){
+		List<GameObject> tempList = new List<GameObject>();
+		tempList.Add(gameObject);
+		foreach(GameObject gobject in neighbours)
+        {
+            ProjectileController objectScript = gobject.GetComponent<ProjectileController>();
+			if(!objectScript.beenChecked && gobject.renderer.material.color == gameObject.renderer.material.color){
+				objectScript.beenChecked = true;
+				tempList.AddRange(objectScript.CountSameColors());
+			}
+		}
+		return tempList;
+	}
+}
+
+

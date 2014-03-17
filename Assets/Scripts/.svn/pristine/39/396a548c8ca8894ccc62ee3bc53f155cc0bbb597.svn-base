@@ -1,0 +1,207 @@
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+
+public class ProjectileController : MonoBehaviour {
+	int power = 18;
+	public bool moving = false;
+	public List<GameObject> neighbours = new List<GameObject>();
+	public int comboLimit;
+	public bool beenChecked = false;
+	public bool rooted = false;
+	public bool collided = false;
+	public bool insidePerimeter = false;
+	private int framesTraveled = 0;
+	public Transform explosion;
+	public AudioClip soundPop;
+	
+	void Start () {
+		comboLimit = 5;
+		rooted = true;
+	}
+	
+	//Updates every frame
+	void Update () {		
+		checkIfCollided();
+		
+		//Move ball forward
+		if(moving){
+			transform.Translate(Vector3.forward*power * Time.deltaTime);
+			framesTraveled ++;
+		}
+		DestroyRunAwayBall();
+		beenChecked = false;
+	}
+	
+	//Starts this ball's movement
+	public void StartMove(){
+		moving = true;
+	}
+	
+	public void DestroyRunAwayBall() {
+		//Destroy if ball has traveled for 100 frames
+		if(framesTraveled>=150){
+			Destroy(gameObject);
+			PerimeterController.miss();
+		}
+	}
+	
+	//On collision with another ball
+	void OnTriggerEnter (Collider other) {		
+		//Adds colliding ball to neighbour list
+		if(other.tag == "BigBall"){
+			neighbours.Add(other.gameObject);
+			
+		}
+	
+		
+		if(other.tag == "Perimeter"){
+			insidePerimeter = true;
+			
+		}
+		//If other target is smallBall ->destroy the smallBall
+		if(other.tag == "SmallBall" && !other.transform.IsChildOf(transform)){
+			GameObject smallBall = other.gameObject;
+			GameObject projectile = smallBall.transform.parent.gameObject;
+			ProjectileController projectileScript = projectile.GetComponent<ProjectileController>();
+			projectileScript.collided = true;
+			
+			
+		}		
+	}
+	
+	//Remove neighbour from neighbourslist if it looses connection
+	void OnTriggerExit (Collider other) {
+		if(other.tag == "BigBall"){
+			neighbours.Remove(other.gameObject);                                 // add an item to the end of the List
+		}
+		
+		if(other.tag == "Perimeter" && moving == false){
+			GameOverController.lose();
+		}
+	}
+	
+		
+	
+	
+	void checkIfCollided(){
+		//Stuck to cluster
+		if(collided){
+			GameObject smallBall = new GameObject();
+			foreach (Transform child in transform)
+			{
+				smallBall = child.gameObject;
+			}
+			Destroy(smallBall);
+			moving = false;
+			beenChecked = true;
+			rooted = true;
+			
+			
+			//isOutsidePerimeter();
+			if(insidePerimeter==false)GameOverController.lose();
+			
+			//Combo
+			List<GameObject> comboList = CountSameColors();
+			if(comboList.Count >= comboLimit){
+				Debug.Log("removing combo " + comboList.Count);
+				
+				//Play sound
+				audio.PlayOneShot(soundPop);
+				Debug.Log("Pop");
+				
+				//Removes all balls in combo
+				foreach(GameObject gobject in comboList)
+				{
+					killObject(gobject);
+				}
+				
+				//Sets all balls to be unrooted
+				GameObject[] worldObjects = GameObject.FindGameObjectsWithTag("BigBall");
+				foreach(GameObject gObject in worldObjects)
+				{
+					ProjectileController objectScript = gObject.GetComponent<ProjectileController>();
+					objectScript.rooted= false;
+				}
+				
+				GameObject blackBall = GameObject.Find("BlackBall");
+				ProjectileController blackballscript = blackBall.GetComponent<ProjectileController>();		
+				blackballscript.rooted = true;
+				blackballscript.beenChecked = true;
+				checkRoots(blackBall);
+				removeUnrooted();				
+			}			
+			collided = false;
+		}
+	}
+	
+
+	//Checks if connected to root
+	void checkRoots(GameObject node){
+		ProjectileController nodeScript = node.GetComponent<ProjectileController>();
+		
+		foreach(GameObject gobject in nodeScript.neighbours)
+        {
+			ProjectileController objectScript = gobject.GetComponent<ProjectileController>();
+			if(!objectScript.beenChecked){
+				objectScript.beenChecked = true;
+				objectScript.rooted = true;
+				checkRoots(gobject);
+			}
+		}
+	}
+	
+	
+	//Removes balls that aren't rooted
+	void removeUnrooted(){
+		GameObject[] worldObjects = GameObject.FindGameObjectsWithTag("BigBall");
+		foreach(GameObject gobject in worldObjects)
+        {
+			ProjectileController objectScript = gobject.GetComponent<ProjectileController>();
+			if(objectScript.rooted == false){
+				killObject(gobject);
+			}
+		}
+	}
+	
+	
+
+	
+	
+	//Removes ball from neighbours' neighbourslist and destroyes itself
+	void killObject(GameObject victim){
+		ProjectileController victimScript = victim.GetComponent<ProjectileController>();
+		foreach(GameObject gobject in victimScript.neighbours)
+        {
+			ProjectileController objectScript = gobject.GetComponent<ProjectileController>();
+			objectScript.neighbours.Remove(victim); 
+		}
+		if(victim.name =="BlackBall")
+			Debug.Log("killing blackball");
+		Transform boom = Instantiate(explosion, victim.transform.position, victim.transform.rotation) as Transform;
+		
+		Destroy(victim);
+		
+		//Debug.Log("Explosion");
+	}
+	
+	
+	//Uses reccursive function to go through neighbours neighbourslist and count balls with same color
+	public List<GameObject> CountSameColors(){
+		List<GameObject> tempList = new List<GameObject>();
+		tempList.Add(gameObject);
+		foreach(GameObject gobject in neighbours)
+        {
+            ProjectileController objectScript = gobject.GetComponent<ProjectileController>();
+			if(!objectScript.beenChecked && gobject.renderer.material.color == gameObject.renderer.material.color){
+				objectScript.beenChecked = true;
+				tempList.AddRange(objectScript.CountSameColors());
+			}
+		}
+		return tempList;
+	}
+	
+	
+}
+
+

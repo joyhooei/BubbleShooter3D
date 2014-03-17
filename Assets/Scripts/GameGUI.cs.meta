@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 67f9d765b4883164d8a88fea32232c86
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - crosshairTex: {instanceID: 0}
+  - sphereTex: {instanceID: 0}
+  - lostTex: {instanceID: 0}
+  - wonTex: {instanceID: 0}
+  - lvlCompTex: {instanceID: 0}
+  - camera: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 

@@ -1,0 +1,138 @@
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+
+public class ProjectileController : MonoBehaviour {
+	int power = 8;
+	public bool moving = false;
+	public List<GameObject> neighbours = new List<GameObject>();
+	//public List<GameObject> comboList = new List<GameObject>();
+	public int comboLimit;
+	public bool beenChecked = false;
+	public bool rooted;
+	
+	void Start () {
+		comboLimit = 3;
+		rooted = true;
+	}
+	//Testing SVN 123123213
+	void Update () {		
+		
+		if(moving){
+			transform.Translate(Vector3.forward*power * Time.deltaTime);
+		}
+		/*if(!rooted){
+			killObject(gameObject);
+		}*/
+		beenChecked = false;
+	}
+	public void StartMove(){
+		moving = true;
+	}
+	
+	void OnTriggerEnter (Collider other) {		
+		if(other.tag == "BigBall"){
+			neighbours.Add(other.gameObject);
+		}
+		
+		if(other.tag == "SmallBall" && !other.transform.IsChildOf(transform)){
+			GameObject smallBall = other.gameObject;
+			GameObject projectile = smallBall.transform.parent.gameObject;
+			ProjectileController projectileScript = projectile.GetComponent<ProjectileController>();
+			
+			Destroy(smallBall);
+			projectileScript.moving = false;
+			projectileScript.beenChecked = true;
+			projectileScript.rooted = true;
+			List<GameObject> comboList = projectileScript.CountSameColors();
+			if(comboList.Count >= comboLimit){
+				foreach(GameObject gobject in comboList)
+				{
+					killObject(gobject);
+				}
+				GameObject blackBall = GameObject.FindWithTag("BlackBall");
+				checkRoots(blackBall);
+				removeUnrooted();
+				
+			}
+			 //var s : GUITexture = FindObjectOfType(GUITexture);
+		}		
+	}
+	void checkRoots(GameObject node){
+		GameObject[] worldObjects = GameObject.FindGameObjectsWithTag("BigBall");
+		Debug.Log(worldObjects.Length);
+		foreach(GameObject gObject in worldObjects)
+        {
+			ProjectileController objectScript = gObject.GetComponent<ProjectileController>();
+			objectScript.rooted= false;
+		}
+		
+		ProjectileController nodeScript = node.GetComponent<ProjectileController>();
+		foreach(GameObject gobject in nodeScript.neighbours)
+        {
+			ProjectileController objectScript = gobject.GetComponent<ProjectileController>();
+			if(!objectScript.beenChecked){
+				objectScript.beenChecked = true;
+				objectScript.rooted = true;
+				checkRoots(gobject);
+			}
+		}
+	}
+	
+	void removeUnrooted(){
+		GameObject[] worldObjects = GameObject.FindGameObjectsWithTag("BigBall");
+		foreach(GameObject gobject in worldObjects)
+        {
+			ProjectileController objectScript = gobject.GetComponent<ProjectileController>();
+			if(objectScript.rooted == false){
+				killObject(gobject);
+			}
+		}
+	}
+	
+	void OnTriggerExit (Collider other) {
+		if(other.tag == "BigBall"){
+			neighbours.Remove(other.gameObject);                                 // add an item to the end of the List
+		}
+		
+	}
+	void killObject(GameObject victim){
+		ProjectileController victimScript = victim.GetComponent<ProjectileController>();
+		foreach(GameObject gobject in victimScript.neighbours)
+        {
+			ProjectileController objectScript = gobject.GetComponent<ProjectileController>();
+			objectScript.neighbours.Remove(victim); 
+		}
+		Destroy(victim);
+	}
+	
+	public void checkIfRooted(GameObject gobject){
+		ProjectileController objectScript = gobject.GetComponent<ProjectileController>();
+		bool isRooted = false;
+		foreach(GameObject element in objectScript.neighbours)
+        {
+			ProjectileController elementScript = element.GetComponent<ProjectileController>();
+			if(elementScript.rooted) isRooted = true;
+		}
+		if(!isRooted && gobject.tag != "BlackBall"){
+			objectScript.rooted = false;
+		}
+	}
+	
+	public List<GameObject> CountSameColors(){
+		List<GameObject> tempList = new List<GameObject>();
+		tempList.Add(gameObject);
+		
+		foreach(GameObject gobject in neighbours)
+        {
+            ProjectileController objectScript = gobject.GetComponent<ProjectileController>();
+			if(!objectScript.beenChecked && gobject.renderer.material.color == gameObject.renderer.material.color){
+				objectScript.beenChecked = true;
+				tempList.AddRange(objectScript.CountSameColors());
+			}
+		}
+		return tempList;
+	}
+}
+
+

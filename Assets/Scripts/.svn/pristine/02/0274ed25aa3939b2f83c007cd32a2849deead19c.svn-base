@@ -1,0 +1,82 @@
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+
+public class ProjectileController : MonoBehaviour {
+	int power = 4;
+	public bool moving = false;
+	public List<GameObject> neighbours = new List<GameObject>();
+	public int comboLimit = 3;
+	public bool toBeDestroyed = false;
+	public bool beenChecked = false;
+	
+	void Start () {
+	}
+	//Testing SVN 123123213sadasdsd
+	void Update () {
+		if(toBeDestroyed){
+			Debug.Log("Destroy me! "+ renderer.material.color);
+			killObject(gameObject);
+			return;
+		}
+		beenChecked = false;
+		if(moving){
+			transform.Translate(Vector3.forward*power * Time.deltaTime);
+		}
+	}
+	public void StartMove(){
+		moving = true;
+	}
+	
+	void OnTriggerEnter (Collider other) {		
+		if(other.tag == "BigBall"){
+			neighbours.Add(other.gameObject);
+		}
+		
+		if(other.tag == "SmallBall" && !other.transform.IsChildOf(transform)){
+			GameObject gObject = other.gameObject;
+			ProjectileController controllerScript = other.transform.parent.GetComponent<ProjectileController>();
+			controllerScript.moving = false;
+			killObject(gObject);
+			controllerScript.CountSameColors(0);
+		}		
+	}
+	
+	void OnTriggerExit (Collider other) {
+		if(other.tag == "BigBall"){
+			neighbours.Remove(other.gameObject);                                 // add an item to the end of the List
+		}
+	}
+	void killObject(GameObject victim){
+		foreach(GameObject gobject in neighbours)
+        {
+			ProjectileController objectScript = gobject.GetComponent<ProjectileController>();
+			objectScript.neighbours.Remove(victim); 
+			Destroy(victim);
+		}
+	}
+	
+	public bool CountSameColors(int i){
+		Debug.Log("Counting" + i);
+		i++;
+		bool foundCombo = false;
+		foreach(GameObject gobject in neighbours)
+        {
+            ProjectileController objectScript = gobject.GetComponent<ProjectileController>();
+			if(!objectScript.beenChecked && gobject.renderer.material.color == gameObject.renderer.material.color){
+				objectScript.beenChecked = true;
+				if(objectScript.CountSameColors(i) || i>=comboLimit){
+					Debug.Log("FoundCombo" + i+"combo"+comboLimit+objectScript.CountSameColors(i));
+					foundCombo = true;
+				}
+			}
+        }
+		if(foundCombo) {
+			toBeDestroyed = true;
+			Debug.Log("Setter true");
+			return true;
+		}else{
+			return false;
+		}
+	}
+}

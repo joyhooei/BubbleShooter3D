@@ -1,0 +1,67 @@
+using UnityEngine;
+using System.Collections;
+
+public class Shooter : MonoBehaviour {
+	public Transform projectile;
+	public Transform smallProjectile;
+	private ProjectileController controllerScript;
+	private bool weaponReady = false;
+	private bool projectileReady = true;
+	private int reloadFrameCounter = 0;
+
+	// Use this for initialization
+	void Start () {
+	
+	}
+	
+ 
+    void Update() {
+		
+		reloadFrameCounter++;
+		if(!weaponReady && reloadFrameCounter>=40  ){
+			weaponReady = true;
+			Transform bigBall;
+			bigBall = Instantiate(projectile, transform.position, transform.rotation) as Transform;
+			bigBall.renderer.material.shader = Shader.Find("Transparent/Diffuse");
+			bigBall.renderer.material.color = getRandColor();
+			bigBall.name = "projectile";
+			bigBall.transform.position = new Vector3(0,0,-12);
+
+			Transform smallBall;
+			smallBall = Instantiate(smallProjectile, transform.position, transform.rotation) as Transform;
+			smallBall.transform.parent = bigBall;
+			
+		}
+		
+		if (Input.GetButtonDown("Fire1") && weaponReady) {
+			GameObject trns = GameObject.Find("projectile");
+			
+			controllerScript = trns.GetComponent<ProjectileController>();
+			controllerScript.StartMove();
+			trns.name = "";
+			
+			weaponReady = false;
+			reloadFrameCounter = 0;
+		}
+	}
+	
+	Color getRandColor(){
+		int numb = Random.Range(1, 4);
+		switch(numb)
+		{
+			case 1:
+				return new Color(1.0F, 0.0F, 0.0F, 0.7F);
+			case 2:
+				return Color.blue;
+			case 3:
+				return Color.yellow;
+			case 4:
+				return Color.white;
+			case 5:
+				return Color.green;
+			default:
+				return Color.black;
+		}
+		
+	}
+}

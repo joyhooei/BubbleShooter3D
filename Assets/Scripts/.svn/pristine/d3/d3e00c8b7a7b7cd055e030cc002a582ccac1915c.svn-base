@@ -1,0 +1,58 @@
+using UnityEngine;
+
+
+public class SpawnBalls : MonoBehaviour {
+	public Transform projectile;
+	public Transform perimeter;
+	
+	
+	void Start () {
+		Screen.showCursor = false;
+		
+		Transform blackBall;
+		blackBall = Instantiate(projectile, transform.position, transform.rotation) as Transform;
+		blackBall.renderer.material.shader = Shader.Find("Transparent/Diffuse");
+		blackBall.renderer.material.color = new Color(0.0F, 0.0F, 0.0F, 1.0F);
+		blackBall.transform.position = new Vector3(0,0,0);
+		blackBall.name = "BlackBall";
+		
+		Transform perimiterBall;
+		perimiterBall = Instantiate(perimeter, transform.position, transform.rotation) as Transform;
+		perimiterBall.renderer.material.shader = Shader.Find("Transparent/Diffuse");
+		perimiterBall.renderer.material.color = new Color(0.5F, 0.0F, 0.0F, 0.4F);
+		perimiterBall.transform.position = new Vector3(0,0,0);
+		perimiterBall.name = "PerimiterBall";
+		
+		
+		
+		float dist = 1.5f;
+		for(int i = 0; i <5; i++){
+			for(int j = 0; j <5; j++){
+				for(int k = 0;k <5; k++){
+					if(!(i==2 && j==2 && k==2)){
+						Transform bigBall;
+						bigBall = Instantiate(projectile, transform.position, transform.rotation) as Transform;
+						bigBall.renderer.material.shader = Shader.Find("Transparent/Diffuse");
+						bigBall.renderer.material.color =  ColorManager.getRandColor();
+						bigBall.tag = "BigBall";
+						bigBall.transform.position = new Vector3(-3+(i*dist),-3+(j*dist),-3+(k*dist));
+
+					}
+					/*Transform smallBall;
+					smallBall = Instantiate(smallProjectile, transform.position, transform.rotation) as Transform;
+					smallBall.transform.parent = bigBall;
+					smallBall.transform.position = bigBall.transform.position;
+					*/
+				}
+			}
+		}
+		
+		
+	}
+	
+	
+	void Update () {
+	
+	}
+
+}

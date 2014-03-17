@@ -1,0 +1,28 @@
+using UnityEngine;
+using System.Collections;
+
+public class SpawnBalls : MonoBehaviour {
+	public Transform projectile;
+	
+	// Use this for initialization
+	void Start () {
+		Transform blackBall;
+            blackBall = Instantiate(projectile, transform.position, transform.rotation) as Transform;
+			blackBall.renderer.material.shader = Shader.Find("Transparent/Diffuse");
+			blackBall.renderer.material.color = new Color(0.0F, 0.0F, 0.0F, 0.5F);
+			blackBall.transform.position = new Vector3(0,0,0);
+
+		
+		/*Transform smallBall;
+			smallBall = Instantiate(smallProjectile, transform.position, transform.rotation) as Transform;
+			smallBall.transform.parent = bigBall;
+		
+		smallBall.transform.position = new Vector3(0,0,0);*/
+
+	}
+	
+	// Update is called once per frame
+	void Update () {
+	
+	}
+}

@@ -51,14 +51,14 @@ public class GameMaster : MonoBehaviour
 		}
 
 		//PlayerPrefs.SetInt ("BombFrequencyLevel", 1);
-		//PlayerPrefs.SetInt ("BombSizeLevel", 1);
+		PlayerPrefs.SetInt ("Xp", 2000);
 
 		upgrades.Add("BombFrequency", 0);
-		upgrades.Add("BombFrequencyBase", 13);
+		upgrades.Add("BombFrequencyBase", 2);
 		upgrades.Add("BombFrequencyCost", 100);
 		upgrades.Add("BombFrequencyMaxLevel", 7);
 		upgrades.Add("BombSize", 0);
-		upgrades.Add("BombSizeBase", 5);
+		upgrades.Add("BombSizeBase", 3);
 		upgrades.Add("BombSizeCost", 100);
 		upgrades.Add("BombSizeMaxLevel", 5);
 	}
@@ -222,10 +222,10 @@ public class GameMaster : MonoBehaviour
 
 			//Make cluster preview rotate
 			ClusterController clustCon = Camera.main.GetComponent<ClusterController>();
-			clustCon.previewSpin(4.0f,360);
+		//clustCon.previewSpin(4.0f,360);
 				
-		Invoke("setLevelReady",4.5f);
-		//Invoke("setLevelReady",0.5f);
+		//Invoke("setLevelReady",4.5f);
+		Invoke("setLevelReady",0.5f);
 		//}
 	}	
 

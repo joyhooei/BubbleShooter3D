@@ -151,7 +151,7 @@ public class ProjectileController : MonoBehaviour {
 					}
 				}
 
-				
+
 				Transform boom = Instantiate(bombExplosion, gameObject.transform.position, gameObject.transform.rotation) as Transform;
 				killObject(gameObject);
 				

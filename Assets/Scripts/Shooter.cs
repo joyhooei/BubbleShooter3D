@@ -65,7 +65,15 @@ public class Shooter : MonoBehaviour {
 					//Stop from shooting when clicking bomb powerup icon. Values are by trial and error
 				}else{
 					//Shoots
-
+					if(loadedBall.name=="Bomb"){
+						Debug.Log ("Shot a bomb");
+						float radius = (float)GameMaster.upgrades["BombSize"]/10;
+						(loadedBall.gameObject.collider as SphereCollider).radius = radius;
+						
+						Transform bombModel = loadedBall.FindChild("Bomb(Clone)");
+						float size = (float)GameMaster.upgrades["BombSize"]/5;
+						bombModel.transform.localScale = new Vector3(size,size,size);
+					}
 
 					controllerScript = loadedBall.GetComponent<ProjectileController>();
 					loadedBall.transform.localPosition = new Vector3(0,0,0);
@@ -182,8 +190,8 @@ public class Shooter : MonoBehaviour {
 			bombModel = Instantiate(bomb, loadedBall.transform.position, Quaternion.LookRotation(new Vector3(0.0f, 0.0f, 1.0f),new Vector3(-0.2f, 0.5f, -0.1f))) as Transform;
 			bombModel.transform.parent = loadedBall.transform;
 
-			float radius = (float)GameMaster.upgrades["BombSize"]/10;
-			(loadedBall.gameObject.collider as SphereCollider).radius = radius;
+			//float radius = (float)GameMaster.upgrades["BombSize"]/10;
+			//(loadedBall.gameObject.collider as SphereCollider).radius = radius;
 
 			/*float size = (float)GameMaster.upgrades["BombSize"]/10;
 			size ++;

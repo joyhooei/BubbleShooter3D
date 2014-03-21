@@ -14,17 +14,24 @@ public class Shooter : MonoBehaviour {
 	private Transform smallBall = null;
 	private List<Color> colorsAvailable;
 	private Vector3 positionSelected = new Vector3(-1,-1,-1);
-	private bool freeView = true;
+	private bool freeView = false;
+	private bool freeViewUsedThisRound = false;
 	private CameraController cameraController;
 	
 	// Use this for initialization
 	void Start () {
 
-
+		EventManager.onFreeView += setFreeView;
 	}
-
-	void onDisable(){
-
+	
+	void OnDisable(){
+		EventManager.onFreeView -= setFreeView;
+		
+	}
+	
+	void setFreeView(bool isActive){
+		freeView  = isActive;
+		freeViewUsedThisRound = true;
 	}
 	
     public void loadBallsAtStart(){	
@@ -68,6 +75,7 @@ public class Shooter : MonoBehaviour {
 	        }
 			if (Input.GetButtonDown("Fire1") && positionSelected==new Vector3(-1,-1,-1)) {		
 				positionSelected = Input.mousePosition;	
+				Debug.Log("Mouse position " +positionSelected[0]+"   "+positionSelected[1]);
 			}
 			if(freeView){
 			}else{
@@ -77,12 +85,13 @@ public class Shooter : MonoBehaviour {
 					RaycastHit hit;
 					if (Physics.Raycast(Camera.main.transform.position, ray.direction, out hit) && (hit.transform == loadedBall ||hit.transform == magazinedBall)){
 						swapBall();
-					}else if(positionSelected[0] <130 && positionSelected[1] <130){
+					}else if(positionSelected[0] <130 && positionSelected[1] <260){
 						//Stop from shooting when clicking bomb powerup icon. Values are by trial and error
 					}else{
 						//Shoots
+
+						//Sets bomb model and bomb collider size 
 						if(loadedBall.name=="Bomb"){
-							Debug.Log ("Shot a bomb");
 							float radius = (float)GameMaster.upgrades["BombSize"]/10;
 							(loadedBall.gameObject.collider as SphereCollider).radius = radius;
 							
@@ -90,7 +99,13 @@ public class Shooter : MonoBehaviour {
 							float size = (float)GameMaster.upgrades["BombSize"]/5;
 							bombModel.transform.localScale = new Vector3(size,size,size);
 						}
-						
+
+						//Count a freeView powerup used
+						if(freeViewUsedThisRound){
+							freeViewUsedThisRound = false;
+							GameMaster.upgrades["FreeView"]--;
+						}
+
 						controllerScript = loadedBall.GetComponent<ProjectileController>();
 						loadedBall.transform.localPosition = new Vector3(0,0,0);
 						loadedBall.transform.rotation = transform.rotation;

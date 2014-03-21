@@ -237,6 +237,7 @@ public class MenuGUI : MonoBehaviour {
 					
 					insertUpgradeItem("Increase bomb frequency", "BombFrequency", areaWidth);
 					insertUpgradeItem("Increase bomb size", "BombSize", areaWidth);
+					insertUpgradeItem("Increase free view frequency", "FreeView", areaWidth);
 
 			GUILayout.BeginHorizontal();
 			GUILayout.Label("Xp to spend",GUILayout.Width(areaWidth*5/10));	

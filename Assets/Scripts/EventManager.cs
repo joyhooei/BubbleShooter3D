@@ -11,6 +11,9 @@ public class EventManager : MonoBehaviour {
 
 	public delegate void WinEventHandler();
 	public static event WinEventHandler onWin;
+
+	public delegate void FreeViewHandler(bool isActive);
+	public static event FreeViewHandler onFreeView;
 	// Use this for initialization
 	void Start () {
 	
@@ -31,6 +34,12 @@ public class EventManager : MonoBehaviour {
 	public static void Victory(){
 		if(onWin != null){
 			onWin();
+		}
+	}
+
+	public static void SetFreeView(bool isActive){
+		if(onFreeView != null){
+			onFreeView(isActive);
 		}
 	}
 

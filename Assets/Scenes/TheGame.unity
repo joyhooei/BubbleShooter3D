@@ -393,6 +393,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sphereTex: {fileID: 2800000, guid: 522b7f561c2bd0347a251259517b95ee, type: 3}
   bombTex: {fileID: 2800000, guid: c73dc48f816d0f24d9a2e2741c71c89c, type: 3}
+  freeViewTex: {fileID: 2800000, guid: 6a27f2d2846e89b4480ebe90a63b00fa, type: 3}
   lostTex: {fileID: 2800000, guid: 9d9140ba24b62e142a3c2b89410ed2ed, type: 3}
   wonTex: {fileID: 2800000, guid: 48be7adfdd06a064cb4099afda765ae2, type: 3}
   lvlCompTex: {fileID: 2800000, guid: 16bd5c38abdbae94b9699a629f04f6f6, type: 3}
@@ -401,6 +402,7 @@ MonoBehaviour:
   starEmpty: {fileID: 2800000, guid: 0971fc2dd46da3442ba0f4bc20a6bcc4, type: 3}
   bombSkin: {fileID: 11400000, guid: 1a71b33102bdc3a48b03ec92ce43f8b9, type: 2}
   bombActiveSkin: {fileID: 11400000, guid: 57681e1dd0d82614e8609faa0935861c, type: 2}
+  freeViewSkin: {fileID: 11400000, guid: ca9700d2cfb2305429b8bc3d59777e55, type: 2}
   menuSkin: {fileID: 11400000, guid: cd8f86b8f82685048a1ca9354a8e16ac, type: 2}
   scoreGUI: {fileID: 2038851706}
   scorePopUpGUI: {fileID: 148170005}

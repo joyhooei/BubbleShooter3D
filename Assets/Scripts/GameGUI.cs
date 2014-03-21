@@ -10,6 +10,7 @@ public class GameGUI : MonoBehaviour {
 	//The game
 	public Texture2D sphereTex;
 	public Texture2D bombTex;
+	public Texture2D freeViewTex;
 	public Texture2D lostTex;
 	public Texture2D wonTex;
 	public Texture2D lvlCompTex;
@@ -18,6 +19,7 @@ public class GameGUI : MonoBehaviour {
 	public Texture2D starEmpty;
 	public GUISkin bombSkin;
 	public GUISkin bombActiveSkin;
+	public GUISkin freeViewSkin;
 	public GUISkin menuSkin;
 	public GUIText scoreGUI;
 	public GUIText scorePopUpGUI;
@@ -32,6 +34,7 @@ public class GameGUI : MonoBehaviour {
 	private bool popUpVisible = false;
 	private Vector3 popUpPos;
 	private bool escMenuActivated = false;
+	private bool isFreeViewActive = false;
 	
 	void Start(){
 
@@ -56,12 +59,15 @@ public class GameGUI : MonoBehaviour {
 
 		EventManager.onBubblesPopped += setPopUp;
 		EventManager.onObjectFired += setBomb;
+		EventManager.onFreeView += setFreeView;
+
 		
 	}
 
 	void OnDisable(){
 		EventManager.onBubblesPopped -= setPopUp;
 		EventManager.onObjectFired -= setBomb;
+		EventManager.onFreeView -= setFreeView;
 
 	}
 
@@ -72,6 +78,12 @@ public class GameGUI : MonoBehaviour {
 				bombActive = true;
 			}
 		}
+	}
+
+	private void setFreeView(bool freeViewActive){
+		isFreeViewActive = freeViewActive;
+
+
 	}
 
 	public void initiateBomb(){
@@ -113,10 +125,27 @@ public class GameGUI : MonoBehaviour {
 		}
 			
 		
+		//Free view button
+		GUI.skin =freeViewSkin;
+		if (GUI.Button(new Rect(5,Screen.height-(freeViewTex.height+bombTex.height), freeViewTex.width, freeViewTex.height),""+GameMaster.upgrades["FreeView"])){
 
+			if(GameMaster.upgrades["FreeView"]>0)			EventManager.SetFreeView(!isFreeViewActive);
+
+		}
+		GUI.skin = null;
+		GUI.skin =menuSkin;
+		if(isFreeViewActive){
+			
+			GUI.Label(new Rect(Screen.width/2-250,50, 500, 150), "Free view active\nDrag to rotate\nPress icon again to deactivate.");
+
+
+		}
+		GUI.skin = null;
+
+		//Bomb button
 		if(bombActive){
 			GUI.skin = bombActiveSkin;
-			if (GUI.Button(new Rect(5,Screen.height-bombTex.height, bombTex.width, bombTex.height),"")){
+			if (GUI.Button(new Rect(5,Screen.height-bombTex.height, bombTex.width, bombTex.height),"") && !isFreeViewActive){
 
 				Shooter shooter = Camera.main.GetComponent<Shooter>();
 				//Successfully loaded bomb

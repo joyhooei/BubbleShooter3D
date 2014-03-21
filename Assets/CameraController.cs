@@ -4,7 +4,7 @@ using System.Collections;
 
 public class CameraController : MonoBehaviour {
 	int cubeRotSpeed = 80;
-	bool freeView = true;
+	bool freeView = false;
 	private Vector2 lastPos;
 	private bool holdingMouse = false;
 	private Vector2 diff;
@@ -14,11 +14,16 @@ public class CameraController : MonoBehaviour {
 	void Start () {
 		//Screen.lockCursor = true;
 		diff = Vector2.zero;
+		EventManager.onFreeView += setFreeView;
 	}
 
-	void FixedUpdate(){
+	void OnDisable(){
+		EventManager.onFreeView -= setFreeView;
 
+	}
 
+	void setFreeView(bool isActive){
+		freeView  = isActive;
 	}
 
 	private void moveCluster(Vector2 movement){

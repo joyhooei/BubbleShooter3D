@@ -48,19 +48,27 @@ public class GameMaster : MonoBehaviour
 			//Create key for powerUps
 			PlayerPrefs.SetInt ("BombFrequencyLevel", 1);
 			PlayerPrefs.SetInt ("BombSizeLevel", 1);
+			PlayerPrefs.SetInt ("FreeViewLevel", 2);
 		}
 
 		//PlayerPrefs.SetInt ("BombFrequencyLevel", 1);
 		PlayerPrefs.SetInt ("Xp", 2000);
+		//PlayerPrefs.SetInt ("FreeViewLevel", 2);
+
+		Debug.Log(" FreeView " + PlayerPrefs.GetInt ("FreeViewLevel"));
 
 		upgrades.Add("BombFrequency", 0);
-		upgrades.Add("BombFrequencyBase", 2);
+		upgrades.Add("BombFrequencyBase", 5);
 		upgrades.Add("BombFrequencyCost", 100);
-		upgrades.Add("BombFrequencyMaxLevel", 7);
+		upgrades.Add("BombFrequencyMaxLevel", 5);
 		upgrades.Add("BombSize", 0);
 		upgrades.Add("BombSizeBase", 10);
 		upgrades.Add("BombSizeCost", 100);
-		upgrades.Add("BombSizeMaxLevel", 5);
+		upgrades.Add("BombSizeMaxLevel", 4);
+		upgrades.Add("FreeView", 0);
+		upgrades.Add("FreeViewBase", 0);
+		upgrades.Add("FreeViewCost", 100);
+		upgrades.Add("FreeViewMaxLevel", 4);
 	}
 	void Awake()
 	{
@@ -180,6 +188,7 @@ public class GameMaster : MonoBehaviour
 		//Setting power ups
 		upgrades["BombFrequency"] = upgrades["BombFrequencyBase"] - (PlayerPrefs.GetInt("BombFrequencyLevel")-1);
 		upgrades["BombSize"] = upgrades["BombSizeBase"] + (PlayerPrefs.GetInt("BombSizeLevel")-1);
+		upgrades["FreeView"] = upgrades["FreeViewBase"] + (PlayerPrefs.GetInt("FreeViewLevel")-1);
 		GameObject playMaster = GameObject.Find("PlayLevelMaster");
 		GameGUI gameGUIScript = playMaster.GetComponent<GameGUI>();
 		gameGUIScript.initiateBomb();

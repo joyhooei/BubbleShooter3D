@@ -48,14 +48,7 @@ public class ProjectileController : MonoBehaviour {
 		beenChecked = false;
 		
 		
-		//Debug.Log (perimeterScript.targetScale*perimeterScript.targetScale - gameObject.transform.position.sqrMagnitude);
-		/*if(updateCount%30 ==0 && gameObject.tag =="BigBall" && !moving){
-			int scale = perimeterScript.targetScale/2-1;//Debug.Log(perimeterScript.targetScale*perimeterScript.targetScale - gameObject.transform.position.sqrMagnitude);
-			float diff = scale*scale - gameObject.transform.position.sqrMagnitude;
-			if(diff<0)
-				//Debug.Log(gameObject.renderer.material.color);
-				perimeterScript.dangerAlert();
-		}*/
+	
 		
 		
 	}
@@ -120,15 +113,24 @@ public class ProjectileController : MonoBehaviour {
 		
 		//Set game to lost if a collided or not moving ball leaves the perimeter
 		if(other.tag == "Perimeter"){
-			if(!moving||collided)		{		GameMaster.lost();}
+			if(!moving||collided)		{		GameMaster.lost(this.gameObject);showThisAsCauseOfLoss();}
 			else 						insidePerimeter = false;
 		}
 	}
-	
+	void showThisAsCauseOfLoss(){
+		//this.renderer.material.shader = Shader.Find("Transparent/Diffuse");
+		//Color c = gameObject.renderer.material.color;
+		//c.a = 0.5f;
+		//this.renderer.material.color = c;
+
+		ParticleSystem particleSystem =  gameObject.GetComponent<ParticleSystem>();
+		particleSystem.Play();
+	}
 	void checkIfCollided(){
 		//Stuck to cluster
 		if(collided){
-			if(!insidePerimeter){		 GameMaster.lost();}
+			if(!insidePerimeter){		 GameMaster.lost(this.gameObject);
+				showThisAsCauseOfLoss();}
 			/*
 			foreach (Transform child in transform)
 			{
@@ -141,7 +143,7 @@ public class ProjectileController : MonoBehaviour {
 			
 			GameObject[] destroyList = new GameObject[neighbours.Count];
         	neighbours.CopyTo(destroyList);
-			
+
 			if(gameObject.name == "Bomb"){
 				int nBubblesExploded = 0;
 				foreach(GameObject gObject in destroyList){	

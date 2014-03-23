@@ -248,7 +248,7 @@ public class GameMaster : MonoBehaviour
 		shooterScript.loadBallsAtStart();
 	}
 	
-	public static void lost(){
+	public static void lost(GameObject causeOfLoss){
 		Debug.Log ("You just lost");
 		hasLost = true;
 		Camera.main.audio.clip = Resources.Load("lost") as AudioClip;
@@ -257,6 +257,7 @@ public class GameMaster : MonoBehaviour
 		//Make cluster preview rotate
 		ClusterController clustCon = Camera.main.GetComponent<ClusterController>();
 		clustCon.previewSpin(0.0f,30);
+
 		
 
 		//AudioSource[] audios = Camera.main.GetComponents<AudioSource>();

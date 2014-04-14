@@ -102,18 +102,19 @@ public class LevelStatRecorder : MonoBehaviour {
 
 	private void isNewRecord(string statString, int statToCheck,  bool largeIsBest = true){
 		string stringToCheck = levelPrefix + statString;
+		Debug.Log (stringToCheck);
 		int isRecord = 0;
 		if(largeIsBest){
 			if(PlayerPrefs.GetInt(stringToCheck)<statToCheck)		isRecord = 1;
 		}else{
 			int recordedRecord = PlayerPrefs.GetInt(stringToCheck);
-			Debug.Log ("Old record "+recordedRecord);
 			if(recordedRecord==0 || recordedRecord>statToCheck)		isRecord = 1;
 		}
 
 		if(isRecord ==1){
 			PlayerPrefs.SetInt(stringToCheck, statToCheck);
 			recordCount++;
+			Debug.Log ("new record");
 		}
 
 		tempDict.Add(statString+"Record", isRecord);

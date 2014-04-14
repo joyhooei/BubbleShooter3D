@@ -46,29 +46,34 @@ public class GameMaster : MonoBehaviour
 			PlayerPrefs.SetFloat("GameVersion", version);
 
 			//Create key for powerUps
-			PlayerPrefs.SetInt ("BombFrequencyLevel", 1);
-			PlayerPrefs.SetInt ("BombSizeLevel", 1);
-			PlayerPrefs.SetInt ("FreeViewLevel", 2);
+			PlayerPrefs.SetInt ("BombFrequencyLevel", 0);
+			PlayerPrefs.SetInt ("BombSizeLevel", 0);
+			PlayerPrefs.SetInt ("FreeViewLevel", 0);
+			PlayerPrefs.SetInt ("ExtraBallLevel", 0);
 		}
-
-		//PlayerPrefs.SetInt ("BombFrequencyLevel", 1);
-		PlayerPrefs.SetInt ("Xp", 2000);
+		PlayerPrefs.SetInt ("oceanLevel1Score", 0);
+		PlayerPrefs.SetInt ("oceanLevel1LargestCombo", 0);
+		//PlayerPrefs.SetInt ("ExtraBallLevel", 0);
+		//PlayerPrefs.SetInt ("Xp", 2000);
 		//PlayerPrefs.SetInt ("FreeViewLevel", 2);
 
-		Debug.Log(" FreeView " + PlayerPrefs.GetInt ("FreeViewLevel"));
 
 		upgrades.Add("BombFrequency", 0);
-		upgrades.Add("BombFrequencyBase", 5);
+		upgrades.Add("BombFrequencyBase", 13);
 		upgrades.Add("BombFrequencyCost", 100);
 		upgrades.Add("BombFrequencyMaxLevel", 5);
 		upgrades.Add("BombSize", 0);
 		upgrades.Add("BombSizeBase", 10);
 		upgrades.Add("BombSizeCost", 100);
-		upgrades.Add("BombSizeMaxLevel", 4);
+		upgrades.Add("BombSizeMaxLevel", 3);
 		upgrades.Add("FreeView", 0);
 		upgrades.Add("FreeViewBase", 0);
 		upgrades.Add("FreeViewCost", 100);
 		upgrades.Add("FreeViewMaxLevel", 4);
+		upgrades.Add("ExtraBall", 0);
+		upgrades.Add("ExtraBallBase", 0);
+		upgrades.Add("ExtraBallCost", 1000);
+		upgrades.Add("ExtraBallMaxLevel", 1);
 	}
 	void Awake()
 	{
@@ -103,6 +108,7 @@ public class GameMaster : MonoBehaviour
 		if(blackBall != null && GameMaster.levelReady){
 			
 			ProjectileController blackBallScript = blackBall.GetComponent<ProjectileController>();
+
 			if(blackBallScript.neighbours.Count ==0){
 				GameMaster.levelReady = false;
 				stopBalls();
@@ -186,13 +192,14 @@ public class GameMaster : MonoBehaviour
 		GameMaster.levelComplete = false;
 
 		//Setting power ups
-		upgrades["BombFrequency"] = upgrades["BombFrequencyBase"] - (PlayerPrefs.GetInt("BombFrequencyLevel")-1);
-		upgrades["BombSize"] = upgrades["BombSizeBase"] + (PlayerPrefs.GetInt("BombSizeLevel")-1);
-		upgrades["FreeView"] = upgrades["FreeViewBase"] + (PlayerPrefs.GetInt("FreeViewLevel")-1);
+		upgrades["BombFrequency"] = upgrades["BombFrequencyBase"] - (PlayerPrefs.GetInt("BombFrequencyLevel"));
+		upgrades["BombSize"] = upgrades["BombSizeBase"] + (PlayerPrefs.GetInt("BombSizeLevel"));
+		upgrades["FreeView"] = upgrades["FreeViewBase"] + (PlayerPrefs.GetInt("FreeViewLevel"));
 		GameObject playMaster = GameObject.Find("PlayLevelMaster");
 		GameGUI gameGUIScript = playMaster.GetComponent<GameGUI>();
 		gameGUIScript.initiateBomb();
-
+		Debug.Log("Bombsize "+ upgrades["BombSize"]);
+		Debug.Log("FreeviewLevel "+ PlayerPrefs.GetInt("FreeViewLevel"));
 		getLevelInfo();
 		
 		PerimeterController.missLeft = GameMaster.missToShrinkPer;

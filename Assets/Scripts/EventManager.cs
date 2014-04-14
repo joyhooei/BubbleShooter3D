@@ -14,10 +14,11 @@ public class EventManager : MonoBehaviour {
 
 	public delegate void FreeViewHandler(bool isActive);
 	public static event FreeViewHandler onFreeView;
-	// Use this for initialization
-	void Start () {
-	
-	}
+
+	public delegate void ProjectileResolvedHandler();
+	public static event ProjectileResolvedHandler onProjectileResolved;
+
+
 
 	public static void BubblesPopped(int combo,int unRooted,int exploded, int points, Vector3 position){
 		if(onBubblesPopped != null){
@@ -43,6 +44,10 @@ public class EventManager : MonoBehaviour {
 		}
 	}
 
-
+	public static void ProjectileResolved(){
+		if(onProjectileResolved != null){
+			onProjectileResolved();
+		}
+	}
 
 }

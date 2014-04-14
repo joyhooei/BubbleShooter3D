@@ -17,6 +17,7 @@ public class GameGUI : MonoBehaviour {
 	public Texture2D worldCompTex;
 	public Texture2D starFull;
 	public Texture2D starEmpty;
+	public Texture2D newRecordTex;
 	public GUISkin bombSkin;
 	public GUISkin bombActiveSkin;
 	public GUISkin freeViewSkin;
@@ -126,41 +127,43 @@ public class GameGUI : MonoBehaviour {
 			
 		
 		//Free view button
-		GUI.skin =freeViewSkin;
-		if (GUI.Button(new Rect(5,Screen.height-(freeViewTex.height+bombTex.height), freeViewTex.width, freeViewTex.height),""+GameMaster.upgrades["FreeView"])){
+		if(GameMaster.upgrades["FreeView"]>0){
+			GUI.skin =freeViewSkin;
+			if (GUI.Button(new Rect(5,Screen.height-(freeViewTex.height+bombTex.height), freeViewTex.width, freeViewTex.height),""+GameMaster.upgrades["FreeView"])){
+				EventManager.SetFreeView(!isFreeViewActive);
 
-			if(GameMaster.upgrades["FreeView"]>0)			EventManager.SetFreeView(!isFreeViewActive);
-
+			}
+			GUI.skin = null;
 		}
-		GUI.skin = null;
 		GUI.skin =menuSkin;
 		if(isFreeViewActive){
-			
-			GUI.Label(new Rect(Screen.width/2-250,50, 500, 150), "Free view active\nDrag to rotate\nPress icon again to deactivate.");
+			GUI.skin.label.fontSize = 38;
+			GUI.Label(new Rect(Screen.width/2-350,50, 700, 150), "Free view active\nDrag to rotate\nPress icon again to deactivate.");
 
 
 		}
 		GUI.skin = null;
 
 		//Bomb button
-		if(bombActive){
-			GUI.skin = bombActiveSkin;
-			if (GUI.Button(new Rect(5,Screen.height-bombTex.height, bombTex.width, bombTex.height),"") && !isFreeViewActive){
+		if(PlayerPrefs.GetInt("BombFrequencyLevel") > 0){		
+			if(bombActive){
+				GUI.skin = bombActiveSkin;
+				if (GUI.Button(new Rect(5,Screen.height-bombTex.height, bombTex.width, bombTex.height),"") && !isFreeViewActive){
 
-				Shooter shooter = Camera.main.GetComponent<Shooter>();
-				//Successfully loaded bomb
-				if(shooter.loadBomb()){
-					bombActive = false;
-					bombCounter = GameMaster.upgrades["BombFrequency"];
+					Shooter shooter = Camera.main.GetComponent<Shooter>();
+					//Successfully loaded bomb
+					if(shooter.loadBomb()){
+						bombActive = false;
+						bombCounter = GameMaster.upgrades["BombFrequency"];
+					}
 				}
-			}
-		}else{
-			GUI.skin = bombSkin;
+			}else{
+				GUI.skin = bombSkin;
 
-			GUI.Label(new Rect(5,Screen.height-bombTex.height, bombTex.width, bombTex.height), ""+bombCounter);
+				GUI.Label(new Rect(5,Screen.height-bombTex.height, bombTex.width, bombTex.height), ""+bombCounter);
+			}
+			GUI.skin = null;
 		}
-		GUI.skin = null;
-		
 		
 		scoreGUI.text = ""+statRecorder.score;
 		
@@ -184,6 +187,7 @@ public class GameGUI : MonoBehaviour {
 
 			
 			if (GUI.Button(new Rect(Screen.width/2-butWidth/2, Screen.height/2-butHeight/2+3*verticalOffset, butWidth, butHeight), "Menu")){					
+				MenuGUI.menuMode = "worldSelection";
 				leaveThisScene(0);
 			}	
 			GUI.skin = null;
@@ -206,7 +210,7 @@ public class GameGUI : MonoBehaviour {
 			                "   Total detached:      \n" +
 			                "   Total bombed:        \n" +
 			                "         \n" +
-			                "   Xp gained:           \n",GUILayout.Height(4*butHeight),GUILayout.Width(butWidth*2/2));			
+			                "   Xp gained:           \n",GUILayout.Height(4*butHeight),GUILayout.Width(530));			
 			
 			GUI.skin.label.alignment = TextAnchor.MiddleRight;
 			GUILayout.Label(scoreSummarize["Score"]+"\n"+
@@ -216,8 +220,17 @@ public class GameGUI : MonoBehaviour {
 			                scoreSummarize["TotalDetached"]+"\n"+
 			                scoreSummarize["TotalExploded"]+"\n"+
 			                "         \n" +
-			                scoreSummarize["Xp"]+"\n",GUILayout.Height(4*butHeight),GUILayout.Width(butWidth*11/8));
-
+			                scoreSummarize["Xp"]+"\n",GUILayout.Height(4*butHeight),GUILayout.Width(100));
+			GUILayout.BeginVertical();
+			GUI.skin.label.alignment = TextAnchor.MiddleLeft;
+			GUILayout.Space(20);
+			if(scoreSummarize["ScoreRecord"] == 1)	GUILayout.Label(newRecordTex,GUILayout.Height(36));	
+			else 	GUILayout.Space(36);
+			if(scoreSummarize["LargestComboRecord"] == 1)	GUILayout.Label(newRecordTex,GUILayout.Height(36));	
+			else 	GUILayout.Space(36);
+			if(scoreSummarize["ShotsUsedRecord"] == 1)	GUILayout.Label(newRecordTex,GUILayout.Height(36));	
+			else 	GUILayout.Space(36);
+			GUILayout.EndVertical();
 			GUILayout.EndHorizontal();
 
 
@@ -281,6 +294,7 @@ public class GameGUI : MonoBehaviour {
 
 				escMenuActivated =false;
 				Time.timeScale = 1.0f;
+				MenuGUI.menuMode = "worldSelection";
 				leaveThisScene(0);
 			}
 			

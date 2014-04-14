@@ -46,27 +46,30 @@ public class ProjectileController : MonoBehaviour {
 		}
 
 		beenChecked = false;
-		
-		
+
+		//Check if ball is too far away.
+		destroyRunAwayBall();
 	
-		
-		
+	
+	
 	}
-	
+
 	//Starts this ball's movement
 	public void StartMove(Vector3 dir){
 		moving = true;
-		Invoke("DestroyRunAwayBall", 1.8f);
 		direction = dir;
 	}
-	
-	public void DestroyRunAwayBall() {
-		//Destroy if ball has traveled for 100 frames
-		if(!(collided || rooted)){
-			Destroy(gameObject);
-			perimeterScript.miss();
-		}
 
+	public void destroyRunAwayBall() {
+
+		//Destroy if squared of position vector is bigger then tested value. Square root is not calculated for effeciency. Camera is at sqrMagnitude 400. Blackball is at 0
+		if(moving){
+			if(this.transform.position.sqrMagnitude>401){
+				Destroy(gameObject);
+				perimeterScript.miss();
+				EventManager.ProjectileResolved();
+			}
+		}
 	}
 	
 	//On collision with another ball
@@ -81,7 +84,6 @@ public class ProjectileController : MonoBehaviour {
 		//If other target is smallBall ->destroy the smallBall
 		if(other.tag == "SmallBall" && !other.transform.IsChildOf(transform) && this.tag != "MagazinedBall"){
 			//Rotate cluster according to impact
-			Debug.Log ("blackball "+ blackBall+"  this name"+this.transform.name+"  other"+other+"  other name"+other.name);
 			Vector3 deltaVec = other.transform.position - blackBall.transform.position;
 			Vector3 rotateAxis = Vector3.Cross(deltaVec, direction);
 			Vector3 sumVec = deltaVec + direction;
@@ -129,34 +131,55 @@ public class ProjectileController : MonoBehaviour {
 	void checkIfCollided(){
 		//Stuck to cluster
 		if(collided){
-			if(!insidePerimeter){		 GameMaster.lost(this.gameObject);
-				showThisAsCauseOfLoss();}
-			/*
-			foreach (Transform child in transform)
-			{
-				Destroy(child.gameObject);
-			}*/
+			//Lose if ball collides outside perimeter
+			if(!insidePerimeter){		 
+				GameMaster.lost(this.gameObject);
+				showThisAsCauseOfLoss();
+			}
+
 			moving = false;
 			beenChecked = true;
 			rooted = true;
 			
 			
-			GameObject[] destroyList = new GameObject[neighbours.Count];
-        	neighbours.CopyTo(destroyList);
+			//Declare and instantiate comboList. If bomb comboList.Count will be 0
+			List<GameObject> comboList = new List<GameObject>();
+			if(gameObject.name != "Bomb") 	comboList = CountSameColors();							
 
-			if(gameObject.name == "Bomb"){
-				int nBubblesExploded = 0;
-				foreach(GameObject gObject in destroyList){	
-					if(gObject.name != "BlackBall"){
-						nBubblesExploded ++;
-						killObject(gObject);
+
+			//Combo			
+			if(comboList.Count >= comboLimit || gameObject.name == "Bomb"){
+				if(comboList.Count >= comboLimit){
+				
+					//Play sound
+					AudioSource.PlayClipAtPoint(soundPop, transform.position);
+					
+					//Removes all balls in combo
+					foreach(GameObject gobject in comboList){
+						killObject(gobject);
 					}
+					
+					
+
+				
+				}else if(gameObject.name == "Bomb"){
+					GameObject[] destroyList = new GameObject[neighbours.Count];
+					neighbours.CopyTo(destroyList);
+
+					int nBubblesExploded = 0;
+					foreach(GameObject gObject in destroyList){	
+						if(gObject.name != "BlackBall"){
+							nBubblesExploded ++;
+							killObject(gObject);
+						}
+					}
+
+
+					Transform boom = Instantiate(bombExplosion, gameObject.transform.position, gameObject.transform.rotation) as Transform;
+					killObject(gameObject);
+
 				}
 
-
-				Transform boom = Instantiate(bombExplosion, gameObject.transform.position, gameObject.transform.rotation) as Transform;
-				killObject(gameObject);
-				
 				//Sets all balls to be unrooted
 				GameObject[] worldObjects = GameObject.FindGameObjectsWithTag("BigBall");
 				foreach(GameObject gObject in worldObjects)
@@ -164,52 +187,14 @@ public class ProjectileController : MonoBehaviour {
 					ProjectileController objectScript = gObject.GetComponent<ProjectileController>();
 					objectScript.rooted= false;
 				}
-
-				ProjectileController blackballscript = blackBall.GetComponent<ProjectileController>();		
-				blackballscript.rooted = true;
-				blackballscript.beenChecked = true;
-				checkRoots(blackBall);
-				int nUnrooted = removeUnrooted();
-
-
-				calcAndSendBubblePoints(0,nUnrooted,nBubblesExploded);
-				//Swap loaded balls if explosion eliminated any colors
-				Shooter shooterScript = Camera.main.GetComponent<Shooter>();
-				shooterScript.swapColor();
 				
-				
-				return;
-			}
-			
-			
-			//Combo
-			List<GameObject> comboList = CountSameColors();			
-			if(comboList.Count >= comboLimit){
-				
-				//Play sound
-				AudioSource.PlayClipAtPoint(soundPop, transform.position);
-				
-				//Removes all balls in combo
-				foreach(GameObject gobject in comboList){
-					killObject(gobject);
-				}
-				
-				
-				//Sets all balls to be unrooted
-				GameObject[] worldObjects = GameObject.FindGameObjectsWithTag("BigBall");
-				foreach(GameObject gObject in worldObjects)
-				{
-					ProjectileController objectScript = gObject.GetComponent<ProjectileController>();
-					objectScript.rooted= false;
-				}
-
 				ProjectileController blackballscript = blackBall.GetComponent<ProjectileController>();		
 				blackballscript.rooted = true;
 				blackballscript.beenChecked = true;
 				checkRoots(blackBall);
 				int nUnrooted = removeUnrooted();
 				
-
+				Debug.Log("combocount" + comboList.Count);
 				calcAndSendBubblePoints(comboList.Count,nUnrooted,0);		
 				
 				if(comboList.Count >12){
@@ -223,17 +208,18 @@ public class ProjectileController : MonoBehaviour {
 				//If combo eliminated a color that is loaded, swap the color
 				Shooter shooterScript = Camera.main.GetComponent<Shooter>();
 				shooterScript.swapColor();
-				
+
+
 			}else{
 				perimeterScript.miss();
-				
-				
-				
+
+				//Check if new ball is close to perimeter
+				perimeterScript.checkIfDanger();
 			}
 			
-			//Check if new ball is close to perimeter
-			perimeterScript.checkIfDanger();
+
 			collided = false;
+			EventManager.ProjectileResolved();
 		}
 	}
 

@@ -75,8 +75,8 @@ PlayerSettings:
     Others: 1
   iPhoneBundleIdentifier: com.RingstadCo.BubbleShooter3D
   productGUID: 8dd0f7da9e6267c448f813dc50afc1a9
-  iPhoneBundleVersion: 0.008
-  AndroidBundleVersionCode: 8
+  iPhoneBundleVersion: 0.009
+  AndroidBundleVersionCode: 9
   AndroidMinSdkVersion: 9
   AndroidPreferredInstallLocation: 1
   aotOptions: 

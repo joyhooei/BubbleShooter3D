@@ -80,8 +80,7 @@ public class MenuGUI : MonoBehaviour {
 		if(menuMode == "mainMenu"){
 			GUILayout.BeginArea(new Rect(Screen.width/2- buttonWidth/2, Screen.height/2 -(buttonHeight*3/2 + spacing), buttonWidth, 800));
 				GUI.skin = levelSelectBtn;
-				GUI.skin.label.alignment = TextAnchor.MiddleCenter;		
-				GUILayout.Space(spacing);				
+				GUI.skin.label.alignment = TextAnchor.MiddleCenter;					
 				if(GUILayout.Button("Start game", GUILayout.Height(buttonHeight))) {	
 					menuMode = "worldSelection";
 				}				
@@ -94,8 +93,7 @@ public class MenuGUI : MonoBehaviour {
 
 				if(GUILayout.Button("Quit", GUILayout.Height(buttonHeight))){
 					Application.Quit();
-				}
-				GUILayout.Space(spacing);			
+				}		
 								
 			GUILayout.EndArea();		
 		}
@@ -221,26 +219,33 @@ public class MenuGUI : MonoBehaviour {
 			GUI.skin = null;
 		}
 		else if(menuMode == "upgradeScreen"){	
-			int areaWidth = 700;
-			int areaHeight = 400;
-			GUI.skin.label.fontSize = 25;
+			int areaWidth = 1040;
+			int areaHeight = 600;
+			GUI.skin.label.fontSize = 46;
+
 			GUILayout.BeginArea(new Rect(Screen.width/2-areaWidth/2,30 ,areaWidth,areaHeight));		
 				GUILayout.BeginVertical("box");
 					//Categories
 					GUILayout.BeginHorizontal();
-						GUILayout.Label("Research",GUILayout.Width(areaWidth*5/10));	
-						GUILayout.Label("Cost",GUILayout.Width(areaWidth*1/10));
+						GUI.skin.label.normal.textColor = Color.yellow;
+						GUILayout.Label("Research",GUILayout.Width(areaWidth*5/10));
+						GUI.skin.label.alignment = TextAnchor.MiddleCenter;
+						GUILayout.Label("Cost",GUILayout.Width(areaWidth*2/10));
 									
-						GUILayout.Label("Level",GUILayout.Width(areaWidth*1/10));
+						GUILayout.Label("Lvl",GUILayout.Width(areaWidth*1/10));
+						GUI.skin.label.alignment = TextAnchor.MiddleLeft;
+						GUI.skin.label.normal.textColor = Color.white;
 					GUILayout.EndHorizontal();	
 					
 					
-					insertUpgradeItem("Increase bomb frequency", "BombFrequency", areaWidth);
-					insertUpgradeItem("Increase bomb size", "BombSize", areaWidth);
-					insertUpgradeItem("Increase free view frequency", "FreeView", areaWidth);
-
+					insertUpgradeItem("Bomb frequency", "BombFrequency", areaWidth);
+					if(PlayerPrefs.GetInt("BombFrequencyLevel") > 0)	insertUpgradeItem("Bomb size", "BombSize", areaWidth);
+					insertUpgradeItem("Free view frequency", "FreeView", areaWidth);
+					insertUpgradeItem("Magazined balls", "ExtraBall", areaWidth);
+			GUILayout.Space(GUI.skin.label.fontSize);
 			GUILayout.BeginHorizontal();
-			GUILayout.Label("Xp to spend",GUILayout.Width(areaWidth*5/10));	
+
+			GUILayout.Label("Xp to spend",GUILayout.Width(areaWidth*6/10));	
 			GUILayout.Label(PlayerPrefs.GetInt("Xp").ToString(),GUILayout.Width(areaWidth*1/10));
 			GUILayout.EndHorizontal();	
 				
@@ -248,7 +253,7 @@ public class MenuGUI : MonoBehaviour {
 			GUILayout.EndArea();
 
 			GUI.skin = levelSelectBtn;
-			GUILayout.BeginArea(new Rect(Screen.width/2-worldButtonWidth,Screen.height/2 + 3*worldButtonHeight/2+20,worldButtonWidth*2,worldButtonHeight));//(buttonWidth/2, Screen.height/2 -levelButtonHeight/2, levelButtonWidth*10, levelButtonHeight));			
+			GUILayout.BeginArea(new Rect(Screen.width/2-worldButtonWidth,Screen.height/2 + 3*worldButtonHeight/2+20,worldButtonWidth*2,worldButtonHeight));			
 				GUILayout.BeginHorizontal();									
 					if(GUILayout.Button("Main menu", GUILayout.Height(worldButtonHeight/2),GUILayout.Width(worldButtonWidth*2))) 			menuMode = "mainMenu";
 				GUILayout.EndHorizontal();
@@ -261,20 +266,22 @@ public class MenuGUI : MonoBehaviour {
 
 		GUILayout.BeginHorizontal();
 		GUILayout.Label(nameOfUpgrade,GUILayout.Width(width*5/10));	
-
+		GUI.skin.label.alignment = TextAnchor.MiddleCenter;
 		int cost = GameMaster.upgrades[lookUpstring+"Cost"];
 
 		int currentLevel = PlayerPrefs.GetInt(lookUpstring+"Level");
 		int maxLevel = GameMaster.upgrades[lookUpstring+"MaxLevel"];
-		cost *= currentLevel;
-		GUILayout.Label(cost.ToString(),GUILayout.Width(width*1/10));
+
 
 		if(currentLevel >= maxLevel){
+			GUILayout.Label("",GUILayout.Width(width*2/10));
 			GUILayout.Label("MAX",GUILayout.Width(width*1/10));
 		}else{
+			cost *= (currentLevel+1);
+			GUILayout.Label(cost.ToString(),GUILayout.Width(width*2/10));
 			GUILayout.Label(currentLevel.ToString(),GUILayout.Width(width*1/10));
-			
-			if(GUILayout.Button("Upgrade", GUILayout.Width(width*3/10))){
+			GUI.skin = levelSelectBtn;
+			if(GUILayout.Button("Upgrade", GUILayout.Width(width*5/30),GUILayout.Height(GUI.skin.button.fontSize+12))){
 				int currentXp = PlayerPrefs.GetInt("Xp");
 				int saldo = currentXp-cost;
 				if(saldo >=0){
@@ -283,7 +290,9 @@ public class MenuGUI : MonoBehaviour {
 				}
 
 			}
+			GUI.skin = null;
 		}
+		GUI.skin.label.alignment = TextAnchor.MiddleLeft;
 		GUILayout.EndHorizontal();
 
 	}

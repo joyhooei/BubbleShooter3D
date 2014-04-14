@@ -9,43 +9,70 @@ public class Shooter : MonoBehaviour {
 	private ProjectileController controllerScript;
 	private bool weaponReady = false;
 	private float time = 0;
-	private Transform magazinedBall = null;
-	private Transform loadedBall = null;
+	private Transform[] balls;
+	private Vector3[] ballPos;
+	private int nBalls;
+	private GameObject blackBall;
 	private Transform smallBall = null;
 	private List<Color> colorsAvailable;
 	private Vector3 positionSelected = new Vector3(-1,-1,-1);
 	private bool freeView = false;
 	private bool freeViewUsedThisRound = false;
 	private CameraController cameraController;
+
 	
 	// Use this for initialization
 	void Start () {
 
+
+		nBalls = 2+PlayerPrefs.GetInt("ExtraBallLevel");
+		balls = new Transform[nBalls];
+		//Set magazined balls positions
+		ballPos = new Vector3[]{
+			new Vector3(1.5f, -1.5f, 3),
+			new Vector3(3.2f, -1.3f, 5),
+			new Vector3(4.6f, -0.9f, 7),
+		};
 		EventManager.onFreeView += setFreeView;
+		EventManager.onProjectileResolved += setWeaponReady;
+		Debug.Log ("making new shooter");
 	}
 	
 	void OnDisable(){
 		EventManager.onFreeView -= setFreeView;
+		EventManager.onProjectileResolved -= setWeaponReady;
 		
 	}
+
 	
 	void setFreeView(bool isActive){
 		freeView  = isActive;
 		freeViewUsedThisRound = true;
 	}
-	
-    public void loadBallsAtStart(){	
-        if(magazinedBall!=null){	Destroy(magazinedBall.gameObject);				}
-		if(loadedBall!=null)		Destroy(loadedBall.gameObject);
-		if(smallBall!=null)			Destroy(smallBall.gameObject);
-        
-		makeBall();
-		loadBall();
-		makeBall();
 
+	void setWeaponReady(){	
+		Debug.Log("setting weapon ready");
+		loadBall(0);
+		makeBall();
 		weaponReady = true;
 	}
 	
+    public void loadBallsAtStart(){	
+		blackBall = GameObject.Find("BlackBall");
+
+		makeBall();
+		for(int i = nBalls-2;i>=0;i--){
+			loadBall(i);
+			makeBall();
+		}
+
+		weaponReady = true;
+		
+		Debug.Log("Ball at "+balls[0]);
+		Debug.Log("Ball at "+balls[1]);
+		Debug.Log("Ball at "+balls[2]);
+	}
+
     void Update() {	
 		if(Input.GetKey(KeyCode.Keypad9)){
 			freeView = true;
@@ -59,13 +86,7 @@ public class Shooter : MonoBehaviour {
 
 		time += Time.deltaTime;
 		if(!GameMaster.hasWon && !GameMaster.levelComplete && !GameMaster.hasLost &&  Time.timeScale == 1.0f){
-			if(time>=1.8f && loadedBall == null && GameMaster.levelReady){
-
-				loadBall();
-				makeBall();
-				weaponReady = true;
-
-			}			
+						
 			positionSelected = new Vector3(-1,-1,-1);
 			
 			foreach (Touch touch in Input.touches) {                
@@ -75,7 +96,6 @@ public class Shooter : MonoBehaviour {
 	        }
 			if (Input.GetButtonDown("Fire1") && positionSelected==new Vector3(-1,-1,-1)) {		
 				positionSelected = Input.mousePosition;	
-				Debug.Log("Mouse position " +positionSelected[0]+"   "+positionSelected[1]);
 			}
 			if(freeView){
 			}else{
@@ -83,7 +103,7 @@ public class Shooter : MonoBehaviour {
 				if(positionSelected != new Vector3(-1,-1,-1) &&  weaponReady){
 					Ray ray = Camera.main.ScreenPointToRay (positionSelected);
 					RaycastHit hit;
-					if (Physics.Raycast(Camera.main.transform.position, ray.direction, out hit) && (hit.transform == loadedBall ||hit.transform == magazinedBall)){
+					if (Physics.Raycast(Camera.main.transform.position, ray.direction, out hit) && raycastMagazinedBalls(hit.transform)){
 						swapBall();
 					}else if(positionSelected[0] <130 && positionSelected[1] <260){
 						//Stop from shooting when clicking bomb powerup icon. Values are by trial and error
@@ -91,12 +111,12 @@ public class Shooter : MonoBehaviour {
 						//Shoots
 
 						//Sets bomb model and bomb collider size 
-						if(loadedBall.name=="Bomb"){
-							float radius = (float)GameMaster.upgrades["BombSize"]/10;
-							(loadedBall.gameObject.collider as SphereCollider).radius = radius;
+						if(balls[0].name=="Bomb"){
+							float radius = (float)GameMaster.upgrades["BombSize"]/20;
+							(balls[0].gameObject.collider as SphereCollider).radius = radius;
 							
-							Transform bombModel = loadedBall.FindChild("Bomb(Clone)");
-							float size = (float)GameMaster.upgrades["BombSize"]/5;
+							Transform bombModel = balls[0].FindChild("Bomb(Clone)");
+							float size = (float)GameMaster.upgrades["BombSize"]/10;
 							bombModel.transform.localScale = new Vector3(size,size,size);
 						}
 
@@ -106,20 +126,19 @@ public class Shooter : MonoBehaviour {
 							GameMaster.upgrades["FreeView"]--;
 						}
 
-						controllerScript = loadedBall.GetComponent<ProjectileController>();
-						loadedBall.transform.localPosition = new Vector3(0,0,0);
-						loadedBall.transform.rotation = transform.rotation;
-						loadedBall.transform.parent = null;
+						controllerScript = balls[0].GetComponent<ProjectileController>();
+						balls[0].transform.localPosition = new Vector3(0,0,0);
+						balls[0].transform.rotation = transform.rotation;
+						balls[0].transform.parent = null;
 						controllerScript.StartMove(ray.direction);
-						loadedBall.tag = "BigBall";
+						balls[0].tag = "BigBall";
 						
 						weaponReady = false;
 						time = 0;	
-						
-						Debug.Log ("fIREOBJECT NAME "+loadedBall.name);
-						EventManager.ObjectFired(loadedBall.name);
-						//Set loadedBall variable to null so a new ball can be loaded
-						loadedBall = null;
+
+						EventManager.ObjectFired(balls[0].name);
+						//Set balls[0] variable to null so a new ball can be loaded
+						balls[0] = null;
 						
 						
 						
@@ -131,55 +150,79 @@ public class Shooter : MonoBehaviour {
 		
 		
 		/*if(Input.GetKey(KeyCode.Keypad2)){
-			loadedBall.renderer.material.color = Color.blue;
+			balls[0].renderer.material.color = Color.blue;
 			magazinedBall.renderer.material.color = Color.blue;
 
 		}*/
 		
-		if(Input.GetKey(KeyCode.Keypad1)){
-			loadedBall.renderer.material.color = Color.red;
-			magazinedBall.renderer.material.color = Color.red;
 
-		}
 
 		
 	}
-	void makeBall(){
-		//Make new magazined ball
-		magazinedBall = Instantiate(projectile, transform.position, transform.rotation) as Transform;
-		magazinedBall.renderer.material.shader = Shader.Find("Parallax Specular");
-		magazinedBall.tag = "MagazinedBall";
-		magazinedBall.name = "Bubble";
-		ColorManager.checkAvailableColor();
-		magazinedBall.renderer.material.color = ColorManager.getRandColor();
-		magazinedBall.transform.parent = this.transform;
-		magazinedBall.transform.localPosition = new Vector3(4.9f,-1.6f,7);		
 
-		GameObject blackBall = GameObject.Find("BlackBall");
-		ProjectileController script = magazinedBall.GetComponent<ProjectileController>();
+	bool raycastMagazinedBalls(Transform hitTransform){
+		foreach(Transform ball in balls){
+			if(hitTransform == ball)	return true;
+		}
+
+		return false;
+	}
+	//Takes ballnr as argument. Will make ball and place it as ball number "ballnr"
+	void makeBall(){
+		int indexToMake = nBalls -1;
+		//Make new magazined ball
+		balls[indexToMake] = Instantiate(projectile, transform.position, transform.rotation) as Transform;
+		balls[indexToMake].renderer.material.shader = Shader.Find("Parallax Specular");
+		balls[indexToMake].tag = "MagazinedBall";
+		balls[indexToMake].name = "Bubble";
+		ColorManager.checkAvailableColor();
+		balls[indexToMake].renderer.material.color = ColorManager.getRandColor();
+		balls[indexToMake].transform.parent = this.transform;
+
+
+		balls[indexToMake].transform.localPosition = ballPos[indexToMake];		
+
+		Debug.Log("MAKING BALL AT "+ indexToMake);
+		ProjectileController script = balls[indexToMake].GetComponent<ProjectileController>();
 		script.blackBall = blackBall;
 
 	}
 	
-	void loadBall(){
-		//Set magazined ball to loaded ball
-		loadedBall = magazinedBall;
-		loadedBall.transform.localPosition = new Vector3(1.5f,-1.5f,3);
-		
-		//Make a small ball as core for the loadedBall ball. It is vital for collisions		
-		smallBall = Instantiate(smallProjectile, transform.position, transform.rotation) as Transform;
-		smallBall.transform.parent = loadedBall;
-		smallBall.transform.position = loadedBall.transform.position;
-		smallBall.tag = "SmallBall";
+	void loadBall(int ballIndex){
+		//Return if ballIndex is equal to last ball
+		if(ballIndex >= nBalls -1)		return;
+		Debug.Log("NBalls "+nBalls);
+		Debug.Log("Transformd "+ballIndex);
+		Debug.Log("Array "+balls[ballIndex+1]);
+		//Load ball one step ahead
+		balls[ballIndex] = balls[ballIndex+1];
+
+		Debug.Log("Transform "+balls[ballIndex].transform.localPosition);
+
+		balls[ballIndex].transform.localPosition = ballPos[ballIndex];
+
+		if(ballIndex ==0){
+			//Make a small ball as core for the balls[0] ball. It is vital for collisions		
+			smallBall = Instantiate(smallProjectile, transform.position, transform.rotation) as Transform;
+			smallBall.transform.parent = balls[0];
+			smallBall.transform.position = balls[0].transform.position;
+			smallBall.tag = "SmallBall";
+		}
+
+		loadBall (++ballIndex);
+
 	}
 	
 	void swapBall(){
 		//Not allowed to swap bombs
-		if(loadedBall.renderer.material.color!= Color.black){
-			Color temp = loadedBall.renderer.material.color;
-			loadedBall.renderer.material.color = magazinedBall.renderer.material.color;
-			magazinedBall.renderer.material.color = temp ;
+		//if(balls[0].renderer.material.color!= Color.black){
+		Color temp = balls[0].renderer.material.color;
+		for(int i = 0;i<nBalls-1;i++){
+			balls[i].renderer.material.color = balls[i+1].renderer.material.color;
 		}
+
+		balls[nBalls-1].renderer.material.color = temp ;
+		//}
 	}
 
 	
@@ -194,12 +237,15 @@ public class Shooter : MonoBehaviour {
 			Debug.Log (ColorManager.colors[i]);
 		}*/
 		if(!GameMaster.levelComplete){
-			if(loadedBall != null)	checkForInvalidColor(loadedBall);						
-			if(magazinedBall != null)		checkForInvalidColor(magazinedBall);	
+			foreach(Transform ball in balls){
+				if(ball !=null)			checkForInvalidColor(ball);
+
+			}
 		}
 	}
 	
 	void checkForInvalidColor(Transform ballToBeChecked){
+	
 		for(int i =0; i<ColorManager.colors.Count;i++){
 			if(ballToBeChecked.renderer.material.color == ColorManager.colors[i])	return;
 		}
@@ -208,17 +254,17 @@ public class Shooter : MonoBehaviour {
 	}
 	
 	public bool loadBomb(){
-		if(Time.timeScale == 1.0f && loadedBall != null){
-			//loadedBall.renderer.material.color = Color.black;
-			loadedBall.name = "Bomb";
-			loadedBall.renderer.enabled = false;
+		if(Time.timeScale == 1.0f && balls[0] != null){
+			//balls[0].renderer.material.color = Color.black;
+			balls[0].name = "Bomb";
+			balls[0].renderer.enabled = false;
 
 			Transform bombModel;
-			bombModel = Instantiate(bomb, loadedBall.transform.position, Quaternion.LookRotation(new Vector3(0.0f, 0.0f, 1.0f),new Vector3(-0.2f, 0.5f, -0.1f))) as Transform;
-			bombModel.transform.parent = loadedBall.transform;
+			bombModel = Instantiate(bomb, balls[0].transform.position, Quaternion.LookRotation(new Vector3(0.0f, 0.0f, 1.0f),new Vector3(-0.2f, 0.5f, -0.1f))) as Transform;
+			bombModel.transform.parent = balls[0].transform;
 
 			//float radius = (float)GameMaster.upgrades["BombSize"]/10;
-			//(loadedBall.gameObject.collider as SphereCollider).radius = radius;
+			//(balls[0].gameObject.collider as SphereCollider).radius = radius;
 
 			/*float size = (float)GameMaster.upgrades["BombSize"]/10;
 			size ++;

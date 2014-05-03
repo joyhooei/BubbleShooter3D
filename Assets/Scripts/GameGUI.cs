@@ -18,6 +18,7 @@ public class GameGUI : MonoBehaviour {
 	public Texture2D starFull;
 	public Texture2D starEmpty;
 	public Texture2D newRecordTex;
+	public GUIText textPopUp;
 	public GUISkin bombSkin;
 	public GUISkin bombActiveSkin;
 	public GUISkin freeViewSkin;
@@ -81,11 +82,7 @@ public class GameGUI : MonoBehaviour {
 		}
 	}
 
-	private void setFreeView(bool freeViewActive){
-		isFreeViewActive = freeViewActive;
-
-
-	}
+	private void setFreeView(bool freeViewActive){	isFreeViewActive = freeViewActive;	}
 
 	public void initiateBomb(){
 		bombCounter = GameMaster.upgrades["BombFrequency"];
@@ -256,6 +253,14 @@ public class GameGUI : MonoBehaviour {
 					leaveThisScene(1,GameMaster.levelNr);
 				}
 			}
+			/*else{
+				//Next world button
+				if (GUI.Button(new Rect(Screen.width/2-7*butWidth/4, Screen.height-4*butHeight/3, butWidth, butHeight), "Next world")){					
+					MenuGUI.enterWorld(GameMaster.worldNr);
+					leaveThisScene(0);
+				}
+			}
+			*/
 			//Replay level button
 			if (GUI.Button(new Rect(Screen.width/2-butWidth/2, Screen.height-4*butHeight/3, butWidth, butHeight), "Replay level")){					
 				leaveThisScene(1,--GameMaster.levelNr);
@@ -310,6 +315,15 @@ public class GameGUI : MonoBehaviour {
 
 	}
 
+	public void popUpText(string text, float duration, TextAnchor position = TextAnchor.MiddleCenter){
+		textPopUp.text = text;
+		textPopUp.anchor = position;
+		Invoke("popDownText",duration);
+
+	}
+
+	private void popDownText(){		if(textPopUp !=null)			textPopUp.text = "";Debug.Log("removing text");		}
+
 	private void leaveThisScene(int levelToLoad, int gameLevelToLoad=0){
 
 		GameMaster script = gameMaster.GetComponent<GameMaster>();	
@@ -323,7 +337,6 @@ public class GameGUI : MonoBehaviour {
 
 	}
 	private void recordLevel(){
-		Debug.Log ("making level");
 		string filepath = "C:/Users/Eivind/Documents/BubbleShooter3D/Assets/Resources/leveldata.xml";
 		XmlDocument xmlDoc = new XmlDocument();
 		

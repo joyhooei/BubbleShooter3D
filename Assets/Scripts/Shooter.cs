@@ -35,7 +35,6 @@ public class Shooter : MonoBehaviour {
 		};
 		EventManager.onFreeView += setFreeView;
 		EventManager.onProjectileResolved += setWeaponReady;
-		Debug.Log ("making new shooter");
 	}
 	
 	void OnDisable(){
@@ -51,7 +50,6 @@ public class Shooter : MonoBehaviour {
 	}
 
 	void setWeaponReady(){	
-		Debug.Log("setting weapon ready");
 		loadBall(0);
 		makeBall();
 		weaponReady = true;
@@ -67,21 +65,15 @@ public class Shooter : MonoBehaviour {
 		}
 
 		weaponReady = true;
-		
-		Debug.Log("Ball at "+balls[0]);
-		Debug.Log("Ball at "+balls[1]);
-		Debug.Log("Ball at "+balls[2]);
 	}
 
     void Update() {	
 		if(Input.GetKey(KeyCode.Keypad9)){
 			freeView = true;
-			Debug.Log ("Activating freeview");
 		}
 		
 		if(Input.GetKey(KeyCode.Keypad7)){
 			freeView = false;
-			Debug.Log ("DeActivating freeview");
 		}
 
 		time += Time.deltaTime;
@@ -182,7 +174,6 @@ public class Shooter : MonoBehaviour {
 
 		balls[indexToMake].transform.localPosition = ballPos[indexToMake];		
 
-		Debug.Log("MAKING BALL AT "+ indexToMake);
 		ProjectileController script = balls[indexToMake].GetComponent<ProjectileController>();
 		script.blackBall = blackBall;
 
@@ -191,13 +182,9 @@ public class Shooter : MonoBehaviour {
 	void loadBall(int ballIndex){
 		//Return if ballIndex is equal to last ball
 		if(ballIndex >= nBalls -1)		return;
-		Debug.Log("NBalls "+nBalls);
-		Debug.Log("Transformd "+ballIndex);
-		Debug.Log("Array "+balls[ballIndex+1]);
 		//Load ball one step ahead
 		balls[ballIndex] = balls[ballIndex+1];
 
-		Debug.Log("Transform "+balls[ballIndex].transform.localPosition);
 
 		balls[ballIndex].transform.localPosition = ballPos[ballIndex];
 

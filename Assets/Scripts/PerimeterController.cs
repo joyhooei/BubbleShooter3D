@@ -95,7 +95,8 @@ public class PerimeterController : MonoBehaviour {
 		Debug.Log("danger");
 	}
 	
-	public void checkIfDanger(){				
+	public void checkIfDanger(){
+
 		GameObject[] balls = GameObject.FindGameObjectsWithTag("BigBall");
 		float scale = targetScale/2-0.0f;
 		float prod = scale*scale;

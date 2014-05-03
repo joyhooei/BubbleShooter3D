@@ -89,7 +89,7 @@ AudioSource:
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
-  Loop: 1
+  Loop: 0
   Mute: 0
   Priority: 128
   DopplerLevel: 1
@@ -155,6 +155,7 @@ MonoBehaviour:
   explosion: {fileID: 400000, guid: 6a64160de3141e242a44a513745a07ca, type: 2}
   bombExplosion: {fileID: 400000, guid: 6e1083c3bc40e3043962fce9139195a7, type: 2}
   soundPop: {fileID: 8300000, guid: 24f8a8578789d6d4490614f68f3665a8, type: 3}
+  soundBomb: {fileID: 8300000, guid: df8635c20eef1eb418657ec8cbc44551, type: 3}
   toBeDestroyed: 0
   blackBall: {fileID: 0}
 --- !u!135 &13500000

@@ -1282,7 +1282,7 @@ Number of colors: 5-6
       <name>Hexapus</name>
       <shrinkInterval>3</shrinkInterval>
       <nColors>6</nColors>
-      <rankingTarget>13</rankingTarget>
+      <rankingTarget>14</rankingTarget>
       <ball x="0" y="0" z="3" type="stone" />
       <ball x="0" y="0" z="4.5" type="randColor" />
       <ball x="0" y="0" z="1.5" type="randColor" />

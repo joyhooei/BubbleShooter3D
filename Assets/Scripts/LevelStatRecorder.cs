@@ -78,10 +78,10 @@ public class LevelStatRecorder : MonoBehaviour {
 		PlayerPrefs.SetInt(levelPrefix+"TimesPlayed", timesPlayed);
 
 
-		int rankingFact = 3;
+		int rankingFact = 4;
 		//int difficultyFact = 4;
-		int worldDifficultyFact = 5;
-		int recordFact = 2;
+		int worldDifficultyFact = 7;
+		int recordFact = 3;
 		int timesPlayedDivisiveFact = 2;
 		int ranking = determineRanking();
 		int difficulty = 1;

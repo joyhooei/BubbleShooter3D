@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class ProjectileController : MonoBehaviour {
-	private int speed = 20;
+	private float speed = 20f;
 	public bool moving = false;
 	public List<GameObject> neighbours = new List<GameObject>();
 	public int comboLimit;
@@ -15,7 +15,10 @@ public class ProjectileController : MonoBehaviour {
 	public Transform explosion;
 	public Transform bombExplosion;
 	public AudioClip soundPop;
+	public AudioClip soundBomb;
 	public bool toBeDestroyed = false;
+	private float floatingSpeed = 0;
+	private float floatingDirection = 0;
 
 	private PerimeterController perimeterScript;
 	private GameGUI gameGUIScript;
@@ -42,15 +45,33 @@ public class ProjectileController : MonoBehaviour {
 		
 		//Move ball forward
 		if(moving){
-			transform.Translate(direction*speed * Time.deltaTime);
+			if(this.tag == "Floater")			transform.Translate(direction*speed * Time.deltaTime, Space.World);
+			else 								transform.Translate(direction*speed * Time.deltaTime);
 		}
 
 		beenChecked = false;
 
 		//Check if ball is too far away.
 		destroyRunAwayBall();
+
+		if(this.tag == "Floater"){
+			Color c = this.renderer.material.color;
+			float greyConst = 0.5f;
+			float fadingConst = 0.3f;
+			float fadingSpeed = fadingConst *Time.deltaTime;
+
+			if(c.r > greyConst)c.r-= fadingSpeed;
+			else if(c.r < greyConst) c.r += fadingSpeed;
+
+			if(c.g > greyConst)c.g-= fadingSpeed;
+			else if(c.g < greyConst) c.g += fadingSpeed;
+
+			if(c.b > greyConst)c.b-= fadingSpeed;
+			else if(c.b < greyConst) c.b+= fadingSpeed;
+
+			renderer.material.color=  c;
 	
-	
+		}
 	
 	}
 
@@ -62,13 +83,18 @@ public class ProjectileController : MonoBehaviour {
 
 	public void destroyRunAwayBall() {
 
-		//Destroy if squared of position vector is bigger then tested value. Square root is not calculated for effeciency. Camera is at sqrMagnitude 400. Blackball is at 0
+		//Destroy if squared of position vector is bigger then tested value. Square root is not calculated for effeciency. 
+		//Camera is at sqrMagnitude 400. Blackball is at 0.Check if bigball to differentiate from floaters.
 		if(moving){
-			if(this.transform.position.sqrMagnitude>401){
+			if(this.tag == "BigBall" && this.transform.position.sqrMagnitude>401){
 				Destroy(gameObject);
 				perimeterScript.miss();
 				EventManager.ProjectileResolved();
+			}else if(this.tag == "Floater" && this.transform.position.sqrMagnitude>160){
+				killObject(this.gameObject);
+				//AudioSource.PlayClipAtPoint(soundPop, transform.position);
 			}
+
 		}
 	}
 	
@@ -82,7 +108,7 @@ public class ProjectileController : MonoBehaviour {
 	
 		
 		//If other target is smallBall ->destroy the smallBall
-		if(other.tag == "SmallBall" && !other.transform.IsChildOf(transform) && this.tag != "MagazinedBall"){
+		if(other.tag == "SmallBall" && !other.transform.IsChildOf(transform) && this.tag != "MagazinedBall" && this.tag !="Floater"){
 			//Rotate cluster according to impact
 			Vector3 deltaVec = other.transform.position - blackBall.transform.position;
 			Vector3 rotateAxis = Vector3.Cross(deltaVec, direction);
@@ -120,10 +146,6 @@ public class ProjectileController : MonoBehaviour {
 		}
 	}
 	void showThisAsCauseOfLoss(){
-		//this.renderer.material.shader = Shader.Find("Transparent/Diffuse");
-		//Color c = gameObject.renderer.material.color;
-		//c.a = 0.5f;
-		//this.renderer.material.color = c;
 
 		ParticleSystem particleSystem =  gameObject.GetComponent<ParticleSystem>();
 		particleSystem.Play();
@@ -131,11 +153,7 @@ public class ProjectileController : MonoBehaviour {
 	void checkIfCollided(){
 		//Stuck to cluster
 		if(collided){
-			//Lose if ball collides outside perimeter
-			if(!insidePerimeter){		 
-				GameMaster.lost(this.gameObject);
-				showThisAsCauseOfLoss();
-			}
+
 
 			moving = false;
 			beenChecked = true;
@@ -176,6 +194,7 @@ public class ProjectileController : MonoBehaviour {
 
 
 					Transform boom = Instantiate(bombExplosion, gameObject.transform.position, gameObject.transform.rotation) as Transform;
+					AudioSource.PlayClipAtPoint(soundBomb, transform.position);
 					killObject(gameObject);
 
 				}
@@ -193,8 +212,7 @@ public class ProjectileController : MonoBehaviour {
 				blackballscript.beenChecked = true;
 				checkRoots(blackBall);
 				int nUnrooted = removeUnrooted();
-				
-				Debug.Log("combocount" + comboList.Count);
+
 				calcAndSendBubblePoints(comboList.Count,nUnrooted,0);		
 				
 				if(comboList.Count >12){
@@ -209,12 +227,19 @@ public class ProjectileController : MonoBehaviour {
 				Shooter shooterScript = Camera.main.GetComponent<Shooter>();
 				shooterScript.swapColor();
 
-
+				//Check if new ball is still close to perimeter
+				perimeterScript.checkIfDanger();
 			}else{
 				perimeterScript.miss();
 
 				//Check if new ball is close to perimeter
 				perimeterScript.checkIfDanger();
+
+				//Lose if ball collides outside perimeter	
+				if(!insidePerimeter){										 
+					GameMaster.lost(this.gameObject);
+					showThisAsCauseOfLoss();
+				}
 			}
 			
 
@@ -251,7 +276,7 @@ public class ProjectileController : MonoBehaviour {
 	
 	
 	//Removes balls that aren't rooted
-	int removeUnrooted(){
+	/*int removeUnrooted(){
 		GameObject[] worldObjects = GameObject.FindGameObjectsWithTag("BigBall");
 		int nUnrooted = 0;
 		foreach(GameObject gobject in worldObjects)
@@ -263,6 +288,27 @@ public class ProjectileController : MonoBehaviour {
 			}
 		}
 		return nUnrooted;
+	}*/
+	int removeUnrooted(){
+		GameObject[] worldObjects = GameObject.FindGameObjectsWithTag("BigBall");
+		int nUnrooted = 0;
+		foreach(GameObject gobject in worldObjects)
+		{
+			ProjectileController objectScript = gobject.GetComponent<ProjectileController>();
+			if(objectScript.rooted == false && objectScript.toBeDestroyed == false && !objectScript.moving){
+				nUnrooted++;
+				objectScript.startFloating(Random.Range(2,3));
+			}
+		}
+		return nUnrooted;
+	}
+
+	void startFloating(float seconds){
+		this.tag = "Floater";
+		moving = true;
+		direction = transform.position;
+		//direction = new Vector3(5,0,0);
+		speed = 0.7f;
 	}
 	
 		
@@ -278,6 +324,7 @@ public class ProjectileController : MonoBehaviour {
 		Transform boom = Instantiate(explosion, victim.transform.position, victim.transform.rotation) as Transform;
 		victimScript.toBeDestroyed = true;
 		Destroy(victim);
+
 	}
 	
 	

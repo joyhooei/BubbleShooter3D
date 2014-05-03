@@ -7,15 +7,15 @@ using System.IO;
 
 public class MenuGUI : MonoBehaviour {
 	//Game menu
-	int buttonHeight = 150;
-	int buttonWidth = 400;
-	int spacing = 50;
-	int worldButtonHeight = 150;
-	int worldButtonWidth = 150;
-	int worldSpacing = 40;
-	int levelButtonHeight = 150;
-	int levelButtonWidth = 150;
-	int levelSpacing = 40;
+	public int buttonHeight = 150;
+	public int buttonWidth = 400;
+	public int spacing = 50;
+	public int worldButtonHeight = 150;
+	public int worldButtonWidth = 150;
+	public int worldSpacing = 40;
+	public int levelButtonHeight = 150;
+	public int levelButtonWidth = 150;
+	public int levelSpacing = 40;
 	public Texture world1;
 	public Texture world2;
 	public Texture world3;
@@ -28,6 +28,7 @@ public class MenuGUI : MonoBehaviour {
 	public Texture rank1;
 	public Texture rank2;
 	public Texture rank3;
+	public Texture starFull;
 	List<Texture> textures;
 
 	GameObject gameMaster;
@@ -72,8 +73,7 @@ public class MenuGUI : MonoBehaviour {
 		xmlDoc.LoadXml(levelInfoXml.text); // load the file.
 
 		Debug.Log ("Current level of XP : " + PlayerPrefs.GetInt ("Xp"));
-		
-		
+
 	
 	}
 	void OnGUI () {
@@ -111,9 +111,12 @@ public class MenuGUI : MonoBehaviour {
 						else if(GUILayout.Button(textures[i-1], GUILayout.Height(worldButtonHeight),GUILayout.Width(worldButtonWidth))){							 					
 							worldNumberSelected = i;
 							setupLevelSelection(worldNumberSelected);
+
 							
 						}
-				GUILayout.Space(worldSpacing);				
+						GUI.DrawTextureWithTexCoords(new Rect((worldButtonWidth+worldSpacing+5)*i-(1*worldButtonWidth),worldButtonHeight/2, worldButtonWidth/2, worldButtonHeight/2), starFull, new Rect(0,0,0.8f,1));
+					
+						GUILayout.Space(worldSpacing);				
 					}
 				
 				GUILayout.EndHorizontal();

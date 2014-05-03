@@ -39,7 +39,7 @@ public class GameMaster : MonoBehaviour
 	void Start(){
 		levelInfoXml = Resources.Load("leveldata") as TextAsset;
 
-		float version = 0.007f;
+		float version = 0.009f;
 		if(PlayerPrefs.GetFloat("GameVersion") != version){
 
 			PlayerPrefs.DeleteAll();
@@ -51,8 +51,6 @@ public class GameMaster : MonoBehaviour
 			PlayerPrefs.SetInt ("FreeViewLevel", 0);
 			PlayerPrefs.SetInt ("ExtraBallLevel", 0);
 		}
-		PlayerPrefs.SetInt ("oceanLevel1Score", 0);
-		PlayerPrefs.SetInt ("oceanLevel1LargestCombo", 0);
 		//PlayerPrefs.SetInt ("ExtraBallLevel", 0);
 		//PlayerPrefs.SetInt ("Xp", 2000);
 		//PlayerPrefs.SetInt ("FreeViewLevel", 2);
@@ -72,7 +70,7 @@ public class GameMaster : MonoBehaviour
 		upgrades.Add("FreeViewMaxLevel", 4);
 		upgrades.Add("ExtraBall", 0);
 		upgrades.Add("ExtraBallBase", 0);
-		upgrades.Add("ExtraBallCost", 1000);
+		upgrades.Add("ExtraBallCost", 700);
 		upgrades.Add("ExtraBallMaxLevel", 1);
 	}
 	void Awake()
@@ -174,7 +172,9 @@ public class GameMaster : MonoBehaviour
 			//if(GameMaster.world == "space")		GameMaster.hasWon = true;
 			//else {
 				if(firstTimeCompleted){
-
+					GameObject playMaster = GameObject.Find("PlayLevelMaster");
+					GameGUI gameGUIScript = playMaster.GetComponent<GameGUI>();
+					gameGUIScript.popUpText("World Unlocked",3.5f);
 					GameMaster.worldComplete = true;
 					PlayerPrefs.SetInt("isWorldUnlocked"+(GameMaster.worldNr+1), 1);
 				
@@ -198,8 +198,6 @@ public class GameMaster : MonoBehaviour
 		GameObject playMaster = GameObject.Find("PlayLevelMaster");
 		GameGUI gameGUIScript = playMaster.GetComponent<GameGUI>();
 		gameGUIScript.initiateBomb();
-		Debug.Log("Bombsize "+ upgrades["BombSize"]);
-		Debug.Log("FreeviewLevel "+ PlayerPrefs.GetInt("FreeViewLevel"));
 		getLevelInfo();
 		
 		PerimeterController.missLeft = GameMaster.missToShrinkPer;
@@ -238,10 +236,11 @@ public class GameMaster : MonoBehaviour
 
 			//Make cluster preview rotate
 			ClusterController clustCon = Camera.main.GetComponent<ClusterController>();
-		//clustCon.previewSpin(4.0f,360);
+		clustCon.previewSpin(4.0f,360);
+		gameGUIScript.popUpText("Level "+levelNr,3.5f);
 				
-		//Invoke("setLevelReady",4.5f);
-		Invoke("setLevelReady",0.5f);
+		Invoke("setLevelReady",4.5f);
+		//Invoke("setLevelReady",0.5f);
 		//}
 	}	
 
@@ -265,7 +264,6 @@ public class GameMaster : MonoBehaviour
 		ClusterController clustCon = Camera.main.GetComponent<ClusterController>();
 		clustCon.previewSpin(0.0f,30);
 
-		
 
 		//AudioSource[] audios = Camera.main.GetComponents<AudioSource>();
 		//audios[1].Play();
